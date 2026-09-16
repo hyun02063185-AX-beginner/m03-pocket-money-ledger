@@ -148,11 +148,17 @@ python -m ledger import --from export.csv
 - 백업, 반복 거래, 표 정렬 등 Mission Core 밖의 기능은 구현하지
   않았다.
 
-## 설계 문서
+## 관련 문서
 
-[docs/m03-architecture-design.md](docs/m03-architecture-design.md)에
-디렉터리 구조, 모듈/클래스 책임, 데이터 스키마, CLI 설계, 공식
-요구사항 ↔ 구현 위치 매핑을 전부 기록해 두었다.
+- [docs/m03-user-guide.md](docs/m03-user-guide.md) — 이 README보다
+  친절한 사용설명서(단계별 튜토리얼, 자주 하는 실수 포함)
+- [docs/m03-architecture-design.md](docs/m03-architecture-design.md) —
+  디렉터리 구조, 모듈/클래스 책임, 데이터 스키마, CLI 설계, 공식
+  요구사항 ↔ 구현 위치 매핑
+- [docs/m03-final-qa-report.md](docs/m03-final-qa-report.md) — 최종
+  감사 결과(공식 요구사항 PASS/BLOCKED 표, 자동/수동 검증 근거)
+- [docs/m03-peer-evaluation-guide.md](docs/m03-peer-evaluation-guide.md) —
+  동료평가 대비 자료(핵심 개념 설명, 예상 질문, 시연 순서)
 
 ## 테스트
 
