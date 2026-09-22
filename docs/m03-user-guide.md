@@ -376,3 +376,938 @@ python -m ledger export --out 2026-09.csv --month 2026-09
 [docs/m03-architecture-design.md](m03-architecture-design.md)를,
 최종 검증 결과가 궁금하면
 [docs/m03-final-qa-report.md](m03-final-qa-report.md)를 참고하라.
+
+---
+
+## 21. 직접 따라 해보는 M03 기능 실습
+
+> 이 실습은 실제 사용 데이터를 건드리지 않고 M03의 기능을 하나씩
+> 직접 실행해보기 위한 연습입니다. 모든 명령은 `./practice-data`
+> (일부는 `./practice-import-data`)를 사용합니다. 위에서 아래로
+> 순서대로 실행하면 됩니다.
+
+**실행 명령 표기 안내**: macOS/Linux에서는 `python3`, Windows에서는
+`python`을 쓸 수 있다(섹션 3 참고). 이 실습 섹션의 모든 예시는
+`python3` 기준으로 적었으니, Windows에서는 `python`으로 바꿔
+읽으면 된다.
+
+### 21.1 사전 확인
+
+현재 위치 확인:
+
+```bash
+pwd
+```
+
+프로젝트 파일 확인:
+
+```bash
+ls
+```
+
+다음 항목이 보여야 한다:
+
+- `ledger/`
+- `main.py`
+- `README.md`
+- `docs/`
+- `tests/`
+
+전체 도움말:
+
+```bash
+python3 -m ledger --help
+```
+
+각 명령의 도움말도 하나씩 직접 확인해본다:
+
+```bash
+python3 -m ledger add --help
+python3 -m ledger list --help
+python3 -m ledger search --help
+python3 -m ledger summary --help
+python3 -m ledger budget --help
+python3 -m ledger category --help
+python3 -m ledger update --help
+python3 -m ledger delete --help
+python3 -m ledger import --help
+python3 -m ledger export --help
+```
+
+간단히 정리하면:
+
+- `-m`은 Python 자체 옵션("뒤의 이름을 module/package로 실행하라").
+- `ledger`는 이 프로젝트의 package.
+- `--data-dir`은 M03에서 정의한 전역 옵션(섹션 4 참고).
+- `--help`는 argparse가 기본 제공하는 도움말 기능.
+
+### 21.2 실습 데이터 폴더 원칙
+
+모든 실습 명령에서 아래 옵션을 사용한다:
+
+```bash
+--data-dir ./practice-data
+```
+
+**`--data-dir`은 반드시 subcommand보다 앞에 와야 한다**(섹션 4).
+
+정상:
+
+```bash
+python3 -m ledger --data-dir ./practice-data list
+```
+
+잘못된 예:
+
+```bash
+python3 -m ledger list --data-dir ./practice-data
+```
+
+한 번 직접 실행해서 argparse 오류를 눈으로 확인해 보자:
+
+```bash
+python3 -m ledger list --data-dir ./practice-data
+echo $?
+```
+
+`unrecognized arguments: --data-dir ./practice-data`라는 usage
+오류와 함께 **exit code 2**로 끝나는 것을 확인한다(Scenario 30에서
+exit code를 다시 정리한다).
+
+### Scenario 1 — 빈 상태 확인
+
+```bash
+python3 -m ledger --data-dir ./practice-data category list
+python3 -m ledger --data-dir ./practice-data list
+```
+
+확인 포인트:
+
+- 처음에는 `[안내] 등록된 카테고리가 없습니다.` /
+  `[안내] 거래 내역이 없습니다.`만 나오고, 데이터가 없다고 해서
+  오류가 나지는 않는다.
+- 아직 `./practice-data` 폴더 자체가 없어도 읽기 명령은 실패하지
+  않는다 — 데이터 디렉터리/파일은 **쓰기가 처음 필요한 시점에**
+  만들어지는 정책이다(섹션 4).
+
+### Scenario 2 — 카테고리 없이 거래 추가 시도
+
+```bash
+python3 -m ledger --data-dir ./practice-data add
+```
+
+프롬프트 예:
+
+```text
+날짜 (YYYY-MM-DD): 2026-09-22
+타입 (income/expense): expense
+카테고리: food
+```
+
+아직 `food` 카테고리가 없으므로 아래와 같은 오류가 나오고 다시
+카테고리를 물어본다(최대 3번):
+
+```text
+[오류] 등록되지 않은 카테고리입니다.
+[힌트] category list로 확인하거나 category add로 먼저 등록하세요.
+카테고리:
+```
+
+계속 `food`를 입력하면 3번째 실패 후 자동으로 등록이 취소되며
+exit code 1로 끝난다. 다음 단계로 바로 넘어가고 싶다면 `Ctrl+C`로
+중간에 종료해도 된다.
+
+이 실습의 목적:
+
+- 거래는 **이미 등록된 카테고리만** 쓸 수 있다.
+- M03은 "식비", "교통" 같은 기본 카테고리를 자동으로 만들어주지
+  않는다(섹션 5, `Option B` 정책).
+
+### Scenario 3 — 카테고리 만들기
+
+```bash
+python3 -m ledger --data-dir ./practice-data category add
+```
+
+입력: `food`
+
+```bash
+python3 -m ledger --data-dir ./practice-data category add
+```
+
+입력: `salary`
+
+```bash
+python3 -m ledger --data-dir ./practice-data category add
+```
+
+입력: `transport`
+
+목록 확인:
+
+```bash
+python3 -m ledger --data-dir ./practice-data category list
+```
+
+확인 포인트: `food`, `salary`, `transport` 세 줄이 순서대로 나온다.
+
+### Scenario 4 — 중복 카테고리 오류
+
+```bash
+python3 -m ledger --data-dir ./practice-data category add
+```
+
+입력: `food`
+
+확인:
+
+```text
+[오류] 이미 등록된 카테고리입니다.
+[힌트] category list로 기존 카테고리를 확인하세요.
+```
+
+- 중복 카테고리가 추가되지 않는다.
+- `[오류]`/`[힌트]` 두 줄 형식이며, Python 트레이스백은 나오지
+  않는다(섹션 16).
+
+### Scenario 5 — 첫 지출 거래 추가
+
+```bash
+python3 -m ledger --data-dir ./practice-data add
+```
+
+예제 입력:
+
+```text
+날짜 (YYYY-MM-DD): 2026-09-22
+타입 (income/expense): expense
+카테고리: food
+금액: 15000
+메모 (선택, Enter로 건너뛰기): 점심
+태그 (쉼표로 구분, 선택): meal,lunch
+```
+
+성공하면 `[저장 완료] id=TX-000001`처럼 나온다.
+
+- 내부 저장 id는 정수(1, 2, 3…)다.
+- `TX-000001`은 화면에 보여줄 때만 붙는 표시용 형식이다(섹션 7).
+
+### Scenario 6 — 수입 거래 추가
+
+```bash
+python3 -m ledger --data-dir ./practice-data add
+```
+
+입력:
+
+```text
+날짜 (YYYY-MM-DD): 2026-09-22
+타입 (income/expense): income
+카테고리: salary
+금액: 3000000
+메모 (선택, Enter로 건너뛰기): 9월 급여
+태그 (쉼표로 구분, 선택): salary
+```
+
+### Scenario 7 — 다른 날짜의 지출 추가
+
+```bash
+python3 -m ledger --data-dir ./practice-data add
+```
+
+입력:
+
+```text
+날짜 (YYYY-MM-DD): 2026-09-20
+타입 (income/expense): expense
+카테고리: transport
+금액: 2500
+메모 (선택, Enter로 건너뛰기): 버스
+태그 (쉼표로 구분, 선택): commute,bus
+```
+
+지난달 거래도 하나 더 추가한다:
+
+```bash
+python3 -m ledger --data-dir ./practice-data add
+```
+
+입력:
+
+```text
+날짜 (YYYY-MM-DD): 2026-08-31
+타입 (income/expense): expense
+카테고리: food
+금액: 8000
+메모 (선택, Enter로 건너뛰기): 저녁
+태그 (쉼표로 구분, 선택): dinner
+```
+
+### Scenario 8 — 목록 확인
+
+전체 기본 목록:
+
+```bash
+python3 -m ledger --data-dir ./practice-data list
+```
+
+최근 2건만:
+
+```bash
+python3 -m ledger --data-dir ./practice-data list --limit 2
+```
+
+확인 포인트:
+
+- "최신순"은 `Transaction.date` 기준 정렬이 아니라 **입력한(파일에
+  기록된) 순서의 역순**이다 — 그래서 방금 넣은 8월 31일 거래가
+  9월 20일 거래보다 위에 나온다(섹션 8).
+- `--limit 2`는 가장 최근에 입력한 2건만 보여준다.
+- 내부적으로는 Generator로 파일을 한 줄씩 읽으며
+  `deque(maxlen=2)`에 채우는 방식이다 — 더 깊은 기술 설명은
+  [동료평가 가이드 5~6번 섹션](m03-peer-evaluation-guide.md)을
+  참고.
+
+### Scenario 9 — 검색 옵션 하나씩 사용
+
+```bash
+python3 -m ledger --data-dir ./practice-data search --category food
+python3 -m ledger --data-dir ./practice-data search --type expense
+python3 -m ledger --data-dir ./practice-data search --q 점심
+python3 -m ledger --data-dir ./practice-data search --tag commute
+python3 -m ledger --data-dir ./practice-data search --from 2026-09-01
+python3 -m ledger --data-dir ./practice-data search --to 2026-09-21
+```
+
+각 옵션의 의미는 섹션 9의 표를 참고.
+
+### Scenario 10 — 검색 조건 조합
+
+```bash
+python3 -m ledger --data-dir ./practice-data search \
+  --from 2026-09-01 \
+  --to 2026-09-30 \
+  --type expense
+```
+
+```bash
+python3 -m ledger --data-dir ./practice-data search \
+  --category food \
+  --type expense
+```
+
+검색 옵션은 전부 **AND**로 조합된다(섹션 9).
+
+### Scenario 11 — 월별 요약
+
+```bash
+python3 -m ledger --data-dir ./practice-data summary --month 2026-09
+```
+
+확인: 총 수입, 총 지출, 잔액, 카테고리별 지출 TOP N.
+
+TOP 개수 지정:
+
+```bash
+python3 -m ledger --data-dir ./practice-data summary \
+  --month 2026-09 \
+  --top 2
+```
+
+데이터 없는 달:
+
+```bash
+python3 -m ledger --data-dir ./practice-data summary --month 2025-01
+```
+
+확인: `데이터 없음`만 출력된다.
+
+### Scenario 12 — 월 예산 설정
+
+```bash
+python3 -m ledger --data-dir ./practice-data budget set \
+  --month 2026-09 \
+  --amount 500000
+```
+
+다시 요약:
+
+```bash
+python3 -m ledger --data-dir ./practice-data summary --month 2026-09
+```
+
+확인: `예산`, `사용률`, `예산 초과: 아니오`가 함께 나온다.
+
+### Scenario 13 — 예산 초과 테스트
+
+일부러 작은 예산으로 다시 설정:
+
+```bash
+python3 -m ledger --data-dir ./practice-data budget set \
+  --month 2026-09 \
+  --amount 10000
+```
+
+다시 요약:
+
+```bash
+python3 -m ledger --data-dir ./practice-data summary --month 2026-09
+```
+
+확인:
+
+- `[경고] 이번 달 예산을 N원 초과했습니다.`가 나온다.
+- 예산을 초과해도 이미 추가된 거래가 지워지거나, 앞으로 거래
+  추가가 막히지 않는다(섹션 11) — 방금 전 Scenario들처럼 거래를
+  더 추가해도 정상적으로 저장된다.
+
+### Scenario 14 — 거래 수정
+
+먼저 id 확인:
+
+```bash
+python3 -m ledger --data-dir ./practice-data list
+```
+
+예를 들어 1번 거래의 금액만 수정:
+
+```bash
+python3 -m ledger --data-dir ./practice-data update \
+  --id 1 \
+  --amount 18000
+```
+
+여러 필드를 한 번에:
+
+```bash
+python3 -m ledger --data-dir ./practice-data update \
+  --id 1 \
+  --amount 20000 \
+  --memo "친구와 점심"
+```
+
+다시 목록으로 반영 확인:
+
+```bash
+python3 -m ledger --data-dir ./practice-data list
+```
+
+### Scenario 15 — memo/tags 비우기
+
+```bash
+python3 -m ledger --data-dir ./practice-data update --id 1 --memo ""
+python3 -m ledger --data-dir ./practice-data update --id 1 --tags ""
+```
+
+확인:
+
+- 옵션 자체를 생략하면 기존 값이 그대로 유지된다.
+- 빈 문자열(`""`)을 명시하면 값이 비워진다.
+
+이 동작은 Service 내부의 **`UNSET` sentinel**로 "생략함"과
+"명시적으로 비움"을 구분하기 때문이다(섹션 12 —
+[동료평가 가이드 12번 섹션](m03-peer-evaluation-guide.md)에 구현
+상세가 있다).
+
+### Scenario 16 — update 오류
+
+수정할 필드를 아예 지정하지 않음:
+
+```bash
+python3 -m ledger --data-dir ./practice-data update --id 1
+```
+
+존재하지 않는 거래:
+
+```bash
+python3 -m ledger --data-dir ./practice-data update \
+  --id 999 \
+  --amount 10000
+```
+
+존재하지 않는 카테고리:
+
+```bash
+python3 -m ledger --data-dir ./practice-data update \
+  --id 1 \
+  --category unknown
+```
+
+세 경우 모두 `[오류]`/`[힌트]` 형식으로 원인과 해결 방법을 보여주고,
+Python 트레이스백은 나오지 않으며 exit code는 1이다.
+
+### Scenario 17 — 사용 중인 카테고리 삭제 시도
+
+```bash
+python3 -m ledger --data-dir ./practice-data category remove
+```
+
+입력: `food`
+
+`food`를 쓰는 거래가 아직 남아 있으므로 삭제가 차단된다:
+
+```text
+[오류] 사용 중인 카테고리는 삭제할 수 없습니다.
+[힌트] 해당 거래의 카테고리를 먼저 수정하세요.
+```
+
+이 동작이 바로 섹션 6에서 설명한 **참조 무결성(referential
+integrity)** 규칙이다 — 카테고리를 지워버리면 그 카테고리를
+가리키는 거래가 존재하지 않는 카테고리를 참조하게 되기 때문이다.
+
+### Scenario 18 — CSV Export (월 기준)
+
+```bash
+python3 -m ledger --data-dir ./practice-data export \
+  --out ./practice-september.csv \
+  --month 2026-09
+```
+
+파일 확인(macOS/Linux):
+
+```bash
+cat ./practice-september.csv
+```
+
+또는:
+
+```bash
+head ./practice-september.csv
+```
+
+확인할 CSV 헤더:
+
+```text
+date,type,category,amount,memo,tags
+```
+
+CSV에 거래 id 컬럼이 없는 것이 정상이다(섹션 15).
+
+### Scenario 19 — CSV Export (기간 기준)
+
+```bash
+python3 -m ledger --data-dir ./practice-data export \
+  --out ./practice-range.csv \
+  --from 2026-09-01 \
+  --to 2026-09-30
+```
+
+확인: `--from`/`--to`는 둘 다 **포함(inclusive)** 경계다(섹션 9의
+검색 `--from`/`--to`와 동일한 규칙).
+
+### Scenario 20 — Export 오류 테스트
+
+기간 조건 없이:
+
+```bash
+python3 -m ledger --data-dir ./practice-data export --out ./invalid.csv
+```
+
+`--from`만 주고 `--to` 없이:
+
+```bash
+python3 -m ledger --data-dir ./practice-data export \
+  --out ./invalid.csv \
+  --from 2026-09-01
+```
+
+`--month`와 기간을 동시에:
+
+```bash
+python3 -m ledger --data-dir ./practice-data export \
+  --out ./invalid.csv \
+  --month 2026-09 \
+  --from 2026-09-01 \
+  --to 2026-09-30
+```
+
+기간이 거꾸로 된 경우:
+
+```bash
+python3 -m ledger --data-dir ./practice-data export \
+  --out ./invalid.csv \
+  --from 2026-09-30 \
+  --to 2026-09-01
+```
+
+네 경우 모두 `[오류]` 한 줄과 `[힌트] 입력값을 다시 확인하세요.`가
+나오고 exit code는 1이다. **참고**: 이 네 가지 오류는 아직
+`ledger/decorators.py`에 한국어 문구가 따로 등록돼 있지 않아서,
+`[오류]` 메시지 자체가 영어 원문(`export requires --month or both
+--from and --to` 등)으로 나온다 — 오역이 아니라 실제 그렇게
+동작하는 것이니 당황하지 않아도 된다.
+
+### Scenario 21 — Import용 별도 데이터셋 만들기
+
+Import는 카테고리가 미리 등록돼 있어야 한다. 원본 `practice-data`와
+섞이지 않도록 새 데이터 폴더를 쓴다:
+
+```bash
+python3 -m ledger --data-dir ./practice-import-data category add
+```
+
+입력: `food`
+
+```bash
+python3 -m ledger --data-dir ./practice-import-data category add
+```
+
+입력: `salary`
+
+```bash
+python3 -m ledger --data-dir ./practice-import-data category add
+```
+
+입력: `transport`
+
+### Scenario 22 — CSV Import
+
+```bash
+python3 -m ledger --data-dir ./practice-import-data import \
+  --from ./practice-september.csv
+```
+
+목록 확인:
+
+```bash
+python3 -m ledger --data-dir ./practice-import-data list
+```
+
+확인 포인트:
+
+- CSV에는 id가 없었지만 import된 거래는 **새 내부 id**를 자동으로
+  받는다.
+- 날짜/타입/카테고리/금액/메모/태그 값은 그대로 유지된다.
+- `practice-data`와 `practice-import-data`는 완전히 별개의
+  데이터셋이다.
+
+### Scenario 23 — 잘못된 CSV 행 스킵
+
+아래 내용을 `practice-bad-row.csv`라는 파일로 저장한다:
+
+```csv
+date,type,category,amount,memo,tags
+2026-09-01,expense,food,10000,정상 거래,meal
+2026-09-02,expense,food,-5000,잘못된 금액,bad
+2026-09-03,expense,food,7000,다시 정상,meal
+```
+
+가져오기:
+
+```bash
+python3 -m ledger --data-dir ./practice-import-data import \
+  --from ./practice-bad-row.csv
+```
+
+확인:
+
+- 첫 번째 행(10000원)은 import된다.
+- 두 번째 행은 금액이 음수(`-5000`)라 `[건너뜀] row=2: 금액은
+  0보다 큰 정수여야 합니다.`로 건너뛴다.
+- 세 번째 행(7000원)은 다시 import된다.
+- 마지막 줄에 `[완료] imported=2, skipped=1`처럼 결과 개수가
+  나온다.
+
+### Scenario 24 — Import 파일 오류
+
+존재하지 않는 파일:
+
+```bash
+python3 -m ledger --data-dir ./practice-import-data import \
+  --from ./does-not-exist.csv
+```
+
+헤더가 잘못된 CSV도 하나 만들어 본다. 아래 내용을
+`practice-bad-header.csv`로 저장:
+
+```csv
+date,type,amount
+2026-09-01,expense,10000
+```
+
+```bash
+python3 -m ledger --data-dir ./practice-import-data import \
+  --from ./practice-bad-header.csv
+```
+
+확인:
+
+- 파일이 없으면 `[오류] cannot open ...`처럼 파일을 열 수 없다는
+  메시지가 나온다.
+- 필수 컬럼(`category`, `memo`, `tags`)이 빠진 CSV는
+  `[오류] CSV 형식이 올바르지 않습니다.`와 함께 **행 단위 스킵이
+  아니라 명령 전체가 실패**한다 — 한 행도 가져오지 않는다.
+- 두 경우 모두 exit code 1이고 트레이스백은 나오지 않는다.
+
+### Scenario 25 — 거래 삭제
+
+먼저 목록:
+
+```bash
+python3 -m ledger --data-dir ./practice-data list
+```
+
+삭제(예: 1번):
+
+```bash
+python3 -m ledger --data-dir ./practice-data delete --id 1
+```
+
+다시 목록으로 확인:
+
+```bash
+python3 -m ledger --data-dir ./practice-data list
+```
+
+없는 id 삭제 시도:
+
+```bash
+python3 -m ledger --data-dir ./practice-data delete --id 999
+```
+
+확인: 존재하면 확인 질문 없이 바로 삭제되고, 없으면 `[오류]`/
+`[힌트]`가 나오고 아무것도 지워지지 않는다(섹션 13).
+
+### Scenario 26 — 카테고리 생명주기 마무리
+
+`food`를 쓰는 거래가 남아 있다면 먼저 전부 삭제하거나 다른
+카테고리로 수정한다. 그런 다음:
+
+```bash
+python3 -m ledger --data-dir ./practice-data category remove
+```
+
+입력: `food`
+
+목록으로 확인:
+
+```bash
+python3 -m ledger --data-dir ./practice-data category list
+```
+
+확인: 더 이상 어떤 거래도 쓰지 않는 카테고리는 정상적으로
+삭제된다 — Scenario 17에서 차단됐던 것과 대조해서 이해하면 된다.
+
+### Scenario 27 — 실제 저장 파일 확인
+
+실습 후 데이터 폴더 안을 들여다본다:
+
+```bash
+ls practice-data
+```
+
+다음 세 파일이 보여야 한다:
+
+```text
+transactions.jsonl
+categories.jsonl
+budgets.jsonl
+```
+
+macOS/Linux에서 내용도 확인해본다:
+
+```bash
+cat practice-data/transactions.jsonl
+cat practice-data/categories.jsonl
+cat practice-data/budgets.jsonl
+```
+
+각 줄이 JSON 객체 하나(JSONL)이고, `transactions.jsonl`의 각
+줄에는 `id`/`type`/`date`/`amount`/`category`/`memo`/`tags` 필드가,
+`categories.jsonl`에는 `name` 필드가 들어 있는 것을 확인한다.
+
+**주의**: 이 파일을 텍스트 에디터로 직접 고쳐 쓰라는 뜻이 아니다
+— 프로그램이 실제로 어떤 형태로 데이터를 저장하는지 **관찰**하는
+용도다.
+
+### Scenario 28 — 영속성 확인
+
+터미널을 새로 열거나, 같은 명령을 여러 번 다시 실행해도:
+
+```bash
+python3 -m ledger --data-dir ./practice-data list
+```
+
+데이터가 그대로 남아 있는지 확인한다. 프로그램이 메모리에만
+데이터를 들고 있는 게 아니라 매번 JSONL 파일을 읽고 쓰기 때문에,
+프로세스가 끝났다 다시 시작해도 내용이 유지된다.
+
+### Scenario 29 — 실제 data와 practice-data 비교
+
+```bash
+python3 -m ledger list
+```
+
+와:
+
+```bash
+python3 -m ledger --data-dir ./practice-data list
+```
+
+를 나란히 비교해본다(둘의 결과가 다르게 나와야 정상이다). 이
+비교로 `--data-dir`이 정확히 어떤 역할을 하는지 직접 체감할 수
+있다(섹션 4).
+
+### Scenario 30 — 종료 코드(exit code) 확인
+
+정상 명령:
+
+```bash
+python3 -m ledger --data-dir ./practice-data list
+echo $?
+```
+
+예상: `0`
+
+애플리케이션 오류(존재하지 않는 id):
+
+```bash
+python3 -m ledger --data-dir ./practice-data delete --id 999
+echo $?
+```
+
+예상: `1`
+
+argparse 사용법 오류(`--data-dir` 위치 잘못):
+
+```bash
+python3 -m ledger list --data-dir ./practice-data
+echo $?
+```
+
+예상: `2`
+
+`--help`:
+
+```bash
+python3 -m ledger --help
+echo $?
+```
+
+예상: `0`
+
+이 네 가지로 CLI의 exit code 0/1/2를 직접 눈으로 확인한다(섹션 16).
+Windows PowerShell을 쓴다면 `echo $?` 대신 `echo $LASTEXITCODE`를
+사용하면 된다.
+
+### QA 재현용 명령 모음
+
+위에서 실행한 명령 중 핵심만 설명 없이 바로 복사해서 다시 테스트할
+수 있도록 모아 둔 것이다. 순서대로 실행하면 위 실습을 처음부터
+다시 재현할 수 있다.
+
+**Help**
+
+```bash
+python3 -m ledger --help
+python3 -m ledger add --help
+python3 -m ledger export --help
+```
+
+**Category**
+
+```bash
+python3 -m ledger --data-dir ./practice-data category add
+python3 -m ledger --data-dir ./practice-data category list
+python3 -m ledger --data-dir ./practice-data category remove
+```
+
+**Add**
+
+```bash
+python3 -m ledger --data-dir ./practice-data add
+```
+
+**List / Search**
+
+```bash
+python3 -m ledger --data-dir ./practice-data list
+python3 -m ledger --data-dir ./practice-data list --limit 2
+python3 -m ledger --data-dir ./practice-data search --category food
+python3 -m ledger --data-dir ./practice-data search --type expense
+python3 -m ledger --data-dir ./practice-data search --q 점심
+python3 -m ledger --data-dir ./practice-data search --tag commute
+python3 -m ledger --data-dir ./practice-data search --from 2026-09-01 --to 2026-09-30
+```
+
+**Budget / Summary**
+
+```bash
+python3 -m ledger --data-dir ./practice-data budget set --month 2026-09 --amount 500000
+python3 -m ledger --data-dir ./practice-data summary --month 2026-09
+python3 -m ledger --data-dir ./practice-data summary --month 2026-09 --top 2
+```
+
+**Update / Delete**
+
+```bash
+python3 -m ledger --data-dir ./practice-data update --id 1 --amount 18000
+python3 -m ledger --data-dir ./practice-data update --id 1 --memo ""
+python3 -m ledger --data-dir ./practice-data update --id 1 --tags ""
+python3 -m ledger --data-dir ./practice-data delete --id 1
+```
+
+**Export**
+
+```bash
+python3 -m ledger --data-dir ./practice-data export --out ./practice-september.csv --month 2026-09
+python3 -m ledger --data-dir ./practice-data export --out ./practice-range.csv --from 2026-09-01 --to 2026-09-30
+```
+
+**Import**
+
+```bash
+python3 -m ledger --data-dir ./practice-import-data import --from ./practice-september.csv
+python3 -m ledger --data-dir ./practice-import-data import --from ./practice-bad-row.csv
+```
+
+**Error cases**
+
+```bash
+python3 -m ledger --data-dir ./practice-data update --id 999 --amount 10000
+python3 -m ledger --data-dir ./practice-data delete --id 999
+python3 -m ledger --data-dir ./practice-data export --out ./invalid.csv
+python3 -m ledger --data-dir ./practice-import-data import --from ./does-not-exist.csv
+```
+
+**Exit code**
+
+```bash
+python3 -m ledger --data-dir ./practice-data list; echo $?
+python3 -m ledger --data-dir ./practice-data delete --id 999; echo $?
+python3 -m ledger list --data-dir ./practice-data; echo $?
+```
+
+### 실습 완료 체크리스트
+
+```text
+[ ] --help 확인
+[ ] category add/list
+[ ] 거래 add
+[ ] list / --limit
+[ ] search 필터
+[ ] monthly summary
+[ ] budget set
+[ ] budget exceeded
+[ ] update
+[ ] memo/tags clear
+[ ] used category remove 차단
+[ ] export month
+[ ] export date range
+[ ] import
+[ ] invalid row skip
+[ ] delete
+[ ] JSONL 파일 직접 확인
+[ ] 프로그램 재실행 후 persistence 확인
+[ ] exit code 0/1/2 확인
+```
+
+### 기존 문서와의 역할
+
+이 문서의 **5분 튜토리얼**(섹션 18)과 이번 **기능 실습**(섹션 21)은
+서로 다른 목적을 갖는다 — 하나를 다른 하나로 합치지 않는다.
+
+| 문서 | 목적 |
+|---|---|
+| 5분 튜토리얼(섹션 18) | 처음 써 보는 빠른 첫 체험 |
+| 직접 따라 해보는 M03 기능 실습(섹션 21) | 전체 기능 학습, 동료평가/QA 재현용 |
