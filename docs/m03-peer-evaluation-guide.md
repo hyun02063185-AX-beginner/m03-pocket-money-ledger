@@ -373,6 +373,402 @@ N개만 유지하는 `deque` 스트리밍 방식과 충돌하기 때문에 의�
 
 ---
 
+## 17. 코드를 읽기 위한 Python·CLI 기초 배경지식
+
+지금까지(1~16번)는 "이 프로젝트가 왜 이렇게 설계됐는가"를
+설명했다. 이 섹션은 그 설명을 읽는 데 필요한 더 기초적인 Python/CLI
+개념을 정리한 것이다. Python이나 CLI가 처음이라면 여기부터 읽고,
+이미 익숙하다면 바로 예상 질문 섹션으로 건너뛰어도 된다. 흐름은
+전부 동일하다: **개념이 무엇인지 → M03 어디에 썼는지 → 코드를 볼 때
+무엇을 보면 되는지.**
+
+### 17.1 `python3 -m ledger` 명령 한 줄 분해
+
+실제 실행 예:
+
+```bash
+python3 -m ledger --data-dir ./test-data list --limit 5
+```
+
+| 토큰 | 의미 |
+|---|---|
+| `python3` | Python 실행 프로그램 자체 |
+| `-m` | Python 자체 옵션. "뒤에 오는 이름을 module/package로 실행하라"는 뜻 |
+| `ledger` | 이 프로젝트의 Python package(`ledger/` 디렉터리). `-m ledger`로 실행하면 `ledger/__main__.py`가 진입점이 된다 |
+| `--data-dir ./test-data` | M03에서 `ledger/cli.py`가 직접 정의한 전역 CLI 옵션 |
+| `list` | M03에서 정의한 subcommand |
+| `--limit 5` | `list` subcommand에만 정의된 option과 그 값 |
+
+**`python3 main.py`와 `python3 -m ledger`의 차이**:
+
+- `python3 main.py` — [main.py](../main.py)라는 파일을 직접 실행. 파일 하나만 있으면 되고, 그 안에서 `ledger.cli.main()`을 불러 쓴다.
+- `python3 -m ledger` — `ledger` package를 module로 실행. Python이 `ledger/__main__.py`를 찾아 실행한다.
+- 이 프로젝트는 두 방식 모두 결과적으로 같은 [ledger/cli.py](../ledger/cli.py)의 `main()`을 호출하도록 만들어져 있지만, **현재 M03의 정식(canonical) 실행 방식은 `python -m ledger`다.**
+
+관련 실제 파일: [main.py](../main.py), [ledger/\_\_main\_\_.py](../ledger/__main__.py), [ledger/cli.py](../ledger/cli.py).
+
+### 17.2 package / module / file의 차이
+
+- `main.py` — Python 파일 하나 = **module** 한 개.
+- `ledger/` — 여러 module을 묶어 놓은 **package**.
+- `ledger/cli.py`, `ledger/services.py`, `ledger/repository.py`, `ledger/models.py`, `ledger/validators.py`, `ledger/decorators.py`, `ledger/errors.py` — package 안에 들어 있는 각각의 module.
+- `ledger/__init__.py` — 이 디렉터리가 그냥 폴더가 아니라 "package로 취급되는 영역"임을 나타내는 파일(현재는 한 줄짜리 설명 문자열만 있다).
+- `ledger/__main__.py` — `python -m ledger`로 실행했을 때 Python이 자동으로 찾아 실행하는 진입점 파일.
+
+이 이상으로 Python import 시스템 내부까지 들어갈 필요는 없다 —
+동료평가에서는 "무엇이 파일이고 무엇이 폴더(package)인지"만
+정확히 구분하면 충분하다.
+
+### 17.3 CLI란 무엇인가
+
+CLI = Command-Line Interface(명령줄 인터페이스). GUI와 대비하면
+쉽다.
+
+| | 사용 방식 |
+|---|---|
+| GUI | 버튼을 클릭하고 마우스로 조작한다 |
+| CLI | 터미널에 명령어와 옵션을 문자로 입력한다 |
+
+M03은 화면(GUI) 없이 터미널 자체를 사용자 인터페이스로 쓴다:
+
+```bash
+python -m ledger list --limit 5
+```
+
+관련 기술 영역 이름: CLI 개발(command-line interface design),
+argument parsing(인자 파싱).
+
+### 17.4 Command / Subcommand / Option / Argument
+
+실제 예:
+
+```bash
+python -m ledger search --category food --type expense
+```
+
+| 구성 요소 | 값 | 역할 |
+|---|---|---|
+| subcommand | `search` | 어떤 동작을 할지 |
+| option | `--category` | 어떤 조건을 줄지 |
+| option value | `food` | 그 조건의 값 |
+| option | `--type` | 또 다른 조건 |
+| option value | `expense` | 그 조건의 값 |
+
+현재 M03의 subcommand 10개: `add`, `list`, `search`, `summary`,
+`budget`, `category`, `update`, `delete`, `import`, `export`.
+
+이 중 `budget`, `category`는 그 아래에 다시 subcommand를 갖는
+**nested subcommand** 구조다: `budget set`, `category list`,
+`category add`, `category remove`. 실제 정의는
+[ledger/cli.py](../ledger/cli.py)의 `build_parser()`를 참고.
+
+### 17.5 `--옵션` 이름은 누가 정하는가
+
+두 층위를 구분해야 한다.
+
+**이미 존재하는 관례**: `--옵션이름` 형태(long option) 자체는
+Unix/Linux 계열 CLI 프로그램에서 널리 쓰이는 관례다. `--help`,
+`--version` 같은 이름은 이 관례를 따른 것.
+
+**개발자가 직접 정의하는 부분**: `--data-dir`, `--limit`,
+`--month`, `--category`처럼 정확히 어떤 이름을 쓸지, 무슨 뜻으로
+쓸지는 이 프로그램을 만든 사람이 정한다. M03에서는 기능
+요구사항을 바탕으로 이름을 정했고, 실제 등록은
+[ledger/cli.py](../ledger/cli.py)의 `argparse` 설정(`add_argument()`
+호출들)에서 이루어진다.
+
+즉, **문서가 옵션을 만드는 것이 아니라, `cli.py`의 argparse 정의가
+실제 프로그램 동작의 source of truth(근거 자료)다.** 문서와 코드가
+어긋나면 코드가 맞다.
+
+### 17.6 argparse란 무엇인가
+
+`argparse`는 Python **표준 라이브러리**다(별도 설치 불필요).
+역할:
+
+- 커맨드라인 문자열(`sys.argv`)을 command/subcommand/option으로 파싱
+- 필수 옵션이 빠졌는지 검사
+- `type=int` 같은 지정으로 문자열 → 숫자 등 기본 형식 변환
+- `--help`를 자동으로 만들어 줌
+- 사용법이 잘못되면 usage 메시지를 출력하고 **exit code 2**로 종료
+
+M03에서 `--data-dir`, `--limit`, `--month`, `--id` 등을 정의하는
+곳이 전부 [ledger/cli.py](../ledger/cli.py)의 `build_parser()`다.
+`--help`는 우리가 직접 구현한 게 아니라 argparse가 기본으로
+제공하는 기능이다.
+
+### 17.7 `--data-dir`의 의미
+
+- 기본값: `./data`
+- 사용 예: `python -m ledger --data-dir ./test-data list`
+- 의미: "이번 실행에서는 데이터를 `./test-data`에서 읽고 쓰라."
+
+**장점**: 실제 운영 데이터와 테스트용 데이터를 분리할 수 있고,
+여러 독립된 데이터셋을 동시에 쓸 수 있으며, 테스트 코드가 매번
+임시 디렉터리를 만들어 격리된 상태로 검증하기 쉬워진다. 즉
+Repository가 특정 폴더 하나에 고정돼 있지 않다.
+
+이 옵션은 Python 자체가 제공하는 옵션이 아니라, M03에서
+argparse로 직접 정의한 **전역 옵션**이다([ledger/cli.py](../ledger/cli.py)
+`build_parser()`의 `parser.add_argument("--data-dir", ...)`). 전역
+옵션이라 subcommand보다 **앞**에 와야 한다:
+
+```bash
+python -m ledger --data-dir ./test-data list   # 올바른 사용
+python -m ledger list --data-dir ./test-data   # 현재 구현에서는 잘못된 사용
+```
+
+### 17.8 M03에서 DB를 사용했는가?
+
+**결론: 사용하지 않았다.** MySQL, PostgreSQL은 물론 SQLite 기반
+저장도 쓰지 않았다.
+
+현재 구조와 일반적인 DB 애플리케이션 구조를 나란히 놓으면:
+
+```
+M03:        CLI → Service → Repository → JSONL 파일
+일반 DB 앱:  CLI → Service → Repository → Database
+```
+
+즉 M03에서는 Database가 있어야 할 자리에 JSONL 파일이 있다고
+이해하면 된다.
+
+**왜 DB를 쓰지 않았는가**: 미션 요구사항이 파일 기반 저장(JSONL
+또는 CSV)을 요구했고, 파일 I/O 자체를 학습하는 것과 Python 표준
+라이브러리만으로 구현하는 것이 미션의 목적이었기 때문이다.
+
+Repository 계층을 Service와 분리해 둔 덕분에(섹션 10 참고), 저장
+방식이 바뀌어도 Service 쪽 코드는 영향을 덜 받는 구조이긴 하다.
+다만 **"DB로 즉시 교체 가능하다"처럼 과장해서 설명하지는 않는다** —
+실제로 DB 어댑터를 만들어 검증한 적은 없다.
+
+### 17.9 표준 라이브러리 vs Python 언어 기능
+
+초심자가 자주 헷갈리는 구분이다.
+
+| 구분 | M03 사례 | 의미 |
+|---|---|---|
+| Python 언어 기능 | Generator / `yield` | Python 문법 자체(설치 불필요, 언어에 내장) |
+| Python 언어 기능 | Type Hint 문법(`int \| None` 등) | Python 코드에 타입을 표기하는 문법 |
+| 표준 라이브러리 | `argparse` | CLI 파싱 |
+| 표준 라이브러리 | `dataclasses` | 데이터 클래스 |
+| 표준 라이브러리 | `collections.deque` | 최대 길이를 가진 큐 |
+| 표준 라이브러리 | `tempfile` | 임시 파일 생성 |
+| 표준 라이브러리 | `os` | 파일시스템/OS 관련 기능 |
+| 표준 라이브러리 | `csv` | CSV 처리 |
+| 표준 라이브러리 | `json` | JSON 처리 |
+| 표준 라이브러리 | `datetime` | 날짜 처리 |
+| 표준 라이브러리 | `pathlib` | 경로(Path) 처리 |
+| 표준 라이브러리 | `unittest` | 테스트 작성/실행 |
+
+**표준 라이브러리**는 Python을 설치하면 자동으로 함께 들어 있는
+모듈들이라 `pip install` 같은 별도 설치가 필요 없다. M03은 이
+표준 라이브러리만으로 구현됐다(섹션 23의 예상 질문 참고).
+
+### 17.10 dataclass, 초심자용 보충 설명 (→ 4번 섹션과 함께 읽기)
+
+가장 쉬운 설명: **"관련된 데이터를 하나의 정해진 양식으로 묶는
+클래스."**
+
+예를 들어 `Transaction`은 이런 필드들을 묶어 놓은 양식이다:
+
+```
+Transaction
+├─ id
+├─ type
+├─ date
+├─ amount
+├─ category
+├─ memo
+└─ tags
+```
+
+일반 class를 쓰면 `__init__`, `__repr__`, `__eq__` 같은 반복되는
+코드를 직접 다 작성해야 하는데, `@dataclass`를 붙이면 필드
+선언만으로 이 코드들이 자동으로 만들어진다.
+
+dict와 비교하면 감이 온다:
+
+```python
+transaction["amount"]   # dict라면 이렇게 키로 접근
+transaction.amount      # dataclass는 속성으로 접근
+```
+
+M03에서 dataclass의 역할: **저장 기술이 아니다. DB도 아니다.**
+거래 하나(또는 예산, 검색 조건 등)의 "형태(shape)"를 코드로
+표현한 것뿐이다. 실제 저장은 여전히 JSONL 파일이 담당한다.
+
+**코드 리뷰 포인트**:
+- `@dataclass`가 붙은 클래스가 어떤 데이터를 표현하는가?
+- 필드 이름과 타입은 무엇인가?
+- 기본값이 있는 필드는 무엇인가?
+
+자세한 목록과 실제 필드는 4번 섹션 표를 참고.
+
+### 17.11 `deque(maxlen=N)`, 초심자용 보충 설명 (→ 6번 섹션과 함께 읽기)
+
+`deque`는 "덱"이라고 읽는다. 일반적으로는 양쪽 끝에서 넣고 뺄 수
+있는 큐 자료구조지만, M03에서 중요한 건 그 자체보다
+`deque(maxlen=N)` 옵션이다.
+
+`maxlen=3`인 deque에 1, 2, 3, 4, 5를 순서대로 넣으면:
+
+```
+1 → [1]
+2 → [1, 2]
+3 → [1, 2, 3]
+4 → [2, 3, 4]   (꽉 차서 가장 오래된 1이 자동으로 밀려남)
+5 → [3, 4, 5]
+```
+
+즉 **"최근 N개만 자동으로 기억하는 대기열"**이다. M03의
+`list --limit 3`이 정확히 이 동작과 연결된다(실제 위치와 이유는
+6번 섹션 참고).
+
+전체를 리스트로 만든 뒤 마지막 N개를 슬라이싱하는 방식과
+비교하면:
+
+| 방식 | 시간 | 메모리 |
+|---|---|---|
+| 전체 `list` 후 슬라이싱 | O(N) | O(N) |
+| Generator + `deque(maxlen=N)` | O(N) | O(limit) |
+
+**주의**: Generator와 deque를 썼다고 해서 "파일을 덜 읽는다"는
+뜻은 아니다. 시간은 여전히 파일 전체 크기(N)에 비례한다 — 줄어드는
+건 메모리다. 이 구분은 17.13에서 더 자세히 다룬다.
+
+### 17.12 Generator / `yield`, 초심자용 보충 설명 (→ 5번 섹션과 함께 읽기)
+
+Generator는 라이브러리가 아니라 **Python 언어 자체의 문법**이다.
+
+일반 함수:
+
+```python
+def values():
+    return [1, 2, 3]   # 결과를 한 번에 다 만들어서 반환
+```
+
+Generator 함수:
+
+```python
+def values():
+    yield 1
+    yield 2
+    yield 3
+```
+
+- `return` — 결과를 반환하고 함수를 완전히 종료한다.
+- `yield` — 값을 하나 내보내고, 함수의 실행 상태를 그 자리에 잠시
+  "보존"한다. 다음에 값을 요청받으면 멈췄던 지점부터 이어서
+  실행한다.
+
+M03에서는 이런 식으로 한 건씩 받아 처리한다:
+
+```python
+for transaction in repository.iter_all():
+    ...
+```
+
+실제 구현 위치와 코드는 5번 섹션 참고.
+
+### 17.13 Generator를 쓰면 정확히 무엇이 좋아지는가
+
+**흔한 오해**: "Generator를 쓰면 무조건 더 빨라진다."
+
+**정확한 설명**: Generator의 주된 장점은 속도가 아니라, **전체
+데이터를 한 번에 메모리에 올리지 않고 필요한 순간에 하나씩
+처리할 수 있다**는 것이다.
+
+| | 전체 로드 | Generator |
+|---|---|---|
+| 100만 건을 읽을 때 | 100만 건을 전부 메모리에 올린 뒤 처리 | 1건 읽기 → 처리 → 다음 1건 읽기 → 처리 → ... |
+
+M03의 실제 사례로 시간(time)과 메모리(memory)를 나눠서 보면:
+
+- `list --limit 5` — 시간은 파일 전체를 읽으므로 O(N), 메모리는
+  `deque`에 5개만 보관하므로 O(5).
+- `summary` — 한 건씩 읽으며 합계만 누적. 원본 거래 전체를
+  저장할 필요가 없다.
+- `export` — 한 건 읽기 → 조건 확인 → 바로 CSV에 기록 → 버림 →
+  다음 건.
+
+그래서 정확한 한 줄 요약은: **"Generator는 속도 최적화라기보다
+스트리밍과 메모리 효율을 위한 기술이다."** (시간 복잡도별 정확한
+차이는 5번 섹션 표 참고 — `list`/`search`/`summary`/`export`가
+전부 같은 메모리 특성을 갖는 건 아니다.)
+
+### 17.14 tempfile / os, 초심자용 보충 설명 (→ 11번 섹션과 함께 읽기)
+
+둘 다 Python **표준 라이브러리**다.
+
+**`tempfile`**: 안전하게 임시 파일을 만들기 위한 모듈. M03에서는
+원본 거래 파일을 바로 덮어쓰지 않고, 새 내용을 먼저 임시 파일에
+작성하기 위해 쓴다.
+
+**`os`**: 운영체제(Operating System) 관련 기능을 제공하는 모듈.
+M03에서 핵심적으로 쓰는 두 함수:
+
+- `os.fsync()` — 파일 내용이 저장장치(디스크)에 실제로 반영되도록
+  운영체제에 요청한다. (그 앞에 호출되는 `flush()`는 Python
+  프로그램 쪽 쓰기 버퍼를 운영체제 쪽으로 넘기는 것이고,
+  `os.fsync()`는 그 다음 단계다.)
+- `os.replace()` — 다 작성된 임시 파일을 원본 파일 위치로
+  교체한다.
+
+너무 깊은 OS 내부 동작까지 설명할 필요는 없다 — "쓰기 버퍼를
+비우고(flush) → 디스크에 반영을 요청하고(fsync) → 완성된 파일로
+교체한다(replace)"는 순서만 이해하면 된다.
+
+### 17.15 왜 원본 파일을 바로 수정하지 않았는가 (→ 11번 섹션과 함께 읽기)
+
+코드 리뷰 관점에서 중요한 질문이다.
+
+**안전하지 않은 방식**(M03이 쓰지 않은 방식):
+
+```
+원본 파일을 쓰기 모드(w)로 연다
+→ 기존 내용이 즉시 지워진다
+→ 새 내용을 쓰는 도중 오류가 나면
+→ 원본도 이미 손상된 상태로 남는다
+```
+
+**M03이 실제로 쓰는 방식**:
+
+```
+원본은 그대로 둔다
+ ↓
+임시 파일에 새 내용을 전부 작성한다
+ ↓
+정상적으로 다 썼다면
+ ↓
+flush + os.fsync()로 디스크에 반영
+ ↓
+os.replace()로 임시 파일을 원본 위치로 교체
+```
+
+핵심 목적은 **"수정 도중 실패했을 때 원본 데이터가 손상될
+위험을 줄이는 것"**이다. 실제 구현과 예외 처리는 11번 섹션 참고.
+
+### 17.16 코드 리뷰할 때 무엇을 보면 되는가 — 파일 지도
+
+이 표는 "어디부터 봐야 할지 모르겠다"는 초심자를 위한 시작점이다.
+
+| 궁금한 내용 | 볼 파일 | 볼 코드 |
+|---|---|---|
+| 명령/옵션 정의 | [ledger/cli.py](../ledger/cli.py) | `build_parser()`, `add_argument()` |
+| `python -m ledger` 진입점 | [ledger/\_\_main\_\_.py](../ledger/__main__.py) | `main()` 호출 |
+| 거래 데이터 구조 | [ledger/models.py](../ledger/models.py) | `Transaction` `@dataclass` |
+| Generator | [ledger/repository.py](../ledger/repository.py) | `iter_all()`, `_iter_jsonl()` |
+| 최근 N건 처리 | [ledger/services.py](../ledger/services.py) | `deque(maxlen=limit)` |
+| 비즈니스 규칙 | [ledger/services.py](../ledger/services.py) | `LedgerService` |
+| 파일 저장 | [ledger/repository.py](../ledger/repository.py) | `_append_jsonl`, `_atomic_write_jsonl` |
+| 안전한 수정/삭제 | [ledger/repository.py](../ledger/repository.py) | `tempfile.mkstemp`, `os.fsync`, `os.replace` |
+| CLI 공통 오류 처리 | [ledger/decorators.py](../ledger/decorators.py) | `handle_errors` |
+| CSV 처리 | [ledger/services.py](../ledger/services.py) | `import_csv`, `export_csv` |
+| 입력 검증 | [ledger/validators.py](../ledger/validators.py) | `validate_date`, `validate_amount`, `validate_transaction_type` 등 |
+
+---
+
 # 동료평가 예상 질문
 
 ## 핵심 질문 (10초/30초 답변 + 코드 위치)
@@ -497,6 +893,93 @@ N개만 유지하는 `deque` 스트리밍 방식과 충돌하기 때문에 의�
   계층을 각각, 그리고 CSV round-trip까지 검증합니다. 실제 임시
   디렉터리를 쓰는 리포지토리로 동작하고 모킹을 최소화했습니다."
 - 근거: [docs/m03-final-qa-report.md](m03-final-qa-report.md)
+
+## 기초 배경지식 질문 (17번 섹션 연결)
+
+**26. `python -m ledger`는 어떤 구조로 실행되나요?**
+- 10초: "`-m`은 뒤에 오는 이름을 module/package로 실행하라는
+  Python 자체 옵션입니다. `ledger`는 이 프로젝트의 package라서,
+  `-m ledger`로 실행하면 `ledger/__main__.py`가 진입점이 됩니다."
+- 30초: "`python3 main.py`는 파일 하나를 직접 실행하는 방식이고,
+  `python3 -m ledger`는 `ledger` package를 module로 실행하는
+  방식입니다. `-m`을 쓰면 Python이 `ledger` 디렉터리 안의
+  `__main__.py`를 찾아서 실행합니다. 두 방식 모두 결과적으로
+  `ledger/cli.py`의 `main()`을 호출하지만, 이 프로젝트의 정식
+  실행 방식은 `python -m ledger`입니다."
+- 코드: [main.py](../main.py), [ledger/\_\_main\_\_.py](../ledger/__main__.py)
+
+**27. `ledger`는 파일인가요, 폴더인가요?**
+- 10초: "폴더(package)입니다. 그 안에 `cli.py`, `services.py`
+  같은 여러 module 파일이 들어 있습니다."
+- 코드: `ledger/` 디렉터리 전체, [ledger/\_\_init\_\_.py](../ledger/__init__.py)
+
+**28. CLI / argparse / option은 서로 어떤 관계인가요?**
+- 30초: "CLI는 터미널에 명령어를 입력해서 프로그램을 조작하는
+  방식 자체를 뜻합니다. `argparse`는 그 명령어 문자열을
+  command/subcommand/option으로 쪼개 주는 Python 표준
+  라이브러리이고, `--data-dir`, `--limit` 같은 구체적인 option
+  이름과 의미는 이 프로그램을 만든 사람이 정해서
+  `ledger/cli.py`의 `build_parser()` 안에서 `add_argument()`로
+  등록합니다. 즉 argparse는 파싱 엔진이고, 실제 옵션 목록은
+  코드가 곧 근거 자료(source of truth)입니다."
+- 코드: [ledger/cli.py](../ledger/cli.py) `build_parser()`
+
+**29. `--data-dir`는 Python이 원래 제공하는 옵션인가요?**
+- 10초: "아니요. Python 자체 옵션이 아니라 M03에서 argparse로
+  직접 만든 전역 옵션입니다. Python이 원래 제공하는 옵션은
+  `-m`처럼 `python` 명령 자체에 붙는 것들입니다."
+- 코드: [ledger/cli.py](../ledger/cli.py) `build_parser()`의
+  `parser.add_argument("--data-dir", ...)`
+
+**30. `--option`처럼 `--`로 시작하는 옵션 형식은 누가 정하나요?**
+- 10초: "`--이름` 형태(long option) 자체는 Unix/Linux 계열 CLI의
+  오래된 관례입니다. 하지만 `--data-dir`, `--limit`처럼 정확히
+  어떤 이름을 쓸지는 이 프로그램을 만든 우리가 정하고,
+  `cli.py`의 argparse 설정에 등록해야 실제로 동작합니다."
+
+**31. argparse는 무엇을 하는 라이브러리인가요?**
+- 10초: "커맨드라인 입력을 명령어와 옵션으로 파싱하고, 필수 옵션
+  누락을 검사하고, 문자열을 숫자로 변환하고, `--help`를 자동으로
+  만들어 주는 Python 표준 라이브러리입니다."
+- 코드: [ledger/cli.py](../ledger/cli.py) `build_parser()`
+
+**32. 이 프로젝트는 데이터베이스를 사용했나요?**
+- 30초: "사용하지 않았습니다. MySQL, PostgreSQL은 물론 SQLite도
+  쓰지 않았습니다. 대신 `CLI → Service → Repository → JSONL
+  파일` 구조로, 일반적인 DB 애플리케이션에서 Database가 있을
+  자리에 JSONL 파일이 들어가 있습니다. 미션 요구사항이 파일 기반
+  저장을 요구했고, 파일 I/O와 표준 라이브러리 학습이 목적이었기
+  때문입니다. Repository를 분리해 뒀지만 'DB로 바로 교체
+  가능하다'는 뜻은 아닙니다 — 실제로 검증한 적은 없습니다."
+- 코드: [ledger/repository.py](../ledger/repository.py)
+
+**33. `dataclass`/`deque`/`tempfile`/`os`는 각각 무엇인가요?**
+- 10초: "`dataclass`는 데이터 형태를 묶는 클래스를 쉽게 만들어
+  주는 표준 라이브러리, `deque`는 `maxlen`을 주면 오래된 항목을
+  자동으로 밀어내는 큐, `tempfile`은 임시 파일을 안전하게 만드는
+  모듈, `os`는 `fsync`/`replace`처럼 운영체제 파일 조작 기능을
+  제공하는 모듈입니다. 넷 다 Python 표준 라이브러리입니다."
+- 코드: 17.9~17.14 섹션 참고
+
+**34. Generator를 쓰면 처리 속도가 빨라지나요?**
+- 30초: "아니요, Generator의 핵심 장점은 속도가 아니라
+  메모리입니다. 전체 파일을 읽어야 하는 시간(예: `list`의 시간
+  복잡도 O(N))은 Generator를 쓰든 안 쓰든 똑같습니다. 달라지는
+  건 메모리로, 전체를 리스트로 만들지 않고 한 건씩 처리하기 때문에
+  `list --limit 5`처럼 메모리는 O(limit)만 씁니다. '빨라진다'가
+  아니라 '한 번에 메모리에 다 올리지 않아도 된다'가 정확한
+  설명입니다."
+- 코드: 17.13 섹션, [ledger/repository.py](../ledger/repository.py) `iter_all()`
+
+**35. `tempfile`/`os`는 파일 안전성에 어떻게 기여하나요?**
+- 30초: "원본 파일을 직접 열어 덮어쓰면, 쓰는 도중 프로그램이
+  죽었을 때 원본이 반쯤 쓰인 상태로 손상될 수 있습니다. M03은
+  대신 `tempfile.mkstemp()`로 같은 디렉터리에 임시 파일을 만들어
+  새 내용을 전부 쓴 뒤, `flush()`와 `os.fsync()`로 디스크에
+  반영을 확인하고, 마지막에 `os.replace()`로 임시 파일을 원본
+  위치로 교체합니다. `os.replace()`는 원자적 연산이라 교체
+  전/후 중 하나만 존재하고 중간 상태가 없습니다."
+- 코드: [ledger/repository.py](../ledger/repository.py) `_atomic_write_jsonl`
 
 ---
 
