@@ -1,5 +1,8 @@
 # M03 — Final QA Report (Sprint 5)
 
+> **Historical/reference document.** 이 문서는 당시의 QA 증거를 보존한다.
+> 현재 학습 경로와 최신 문서 진입점은 [M03 Reference](m03-reference.md)를 참고한다.
+
 이 문서는 Sprint 5(최종 감사)의 결과물이다. 새 기능을 구현하지
 않았고, 코드는 문서 정확성 때문에 수정한 두 군데(섹션 "발견된
 불일치와 조치" 참고)를 제외하면 전혀 손대지 않았다. 모든 검증은

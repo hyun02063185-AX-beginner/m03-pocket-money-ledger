@@ -1,5 +1,9 @@
 # M03 — 나만의 용돈 기입장 프로그램 아키텍처 설계
 
+> **Historical/reference document.** 설계 결정과 요구사항 추적을 보존한 상세 기록이다.
+> 처음 읽을 문서는 [M03 Hands-on Guide](m03-hands-on-guide.md), 코드 학습 문서는
+> [M03 Code Reading Guide](m03-code-reading-guide.md), 요약 참조는 [M03 Reference](m03-reference.md)다.
+
 이 문서는 기능 구현 이전 단계에서 프로젝트 구조와 설계를 확정하기 위한
 아키텍처 리뷰다. Sprint 0에서 초안을 만들었고, Sprint 0B에서 공식 원문과
 대조해 여러 항목을 정정했다 — **이 문서는 Sprint 0B 기준 최종본이며,

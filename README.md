@@ -150,15 +150,18 @@ python -m ledger import --from export.csv
 
 ## 관련 문서
 
-- [docs/m03-user-guide.md](docs/m03-user-guide.md) — 이 README보다
-  친절한 사용설명서(단계별 튜토리얼, 자주 하는 실수 포함)
-- [docs/m03-architecture-design.md](docs/m03-architecture-design.md) —
-  디렉터리 구조, 모듈/클래스 책임, 데이터 스키마, CLI 설계, 공식
-  요구사항 ↔ 구현 위치 매핑
-- [docs/m03-final-qa-report.md](docs/m03-final-qa-report.md) — 최종
-  감사 결과(공식 요구사항 PASS/BLOCKED 표, 자동/수동 검증 근거)
-- [docs/m03-peer-evaluation-guide.md](docs/m03-peer-evaluation-guide.md) —
-  동료평가 대비 자료(핵심 개념 설명, 예상 질문, 시연 순서)
+추천 읽기 순서:
+
+- 처음 사용한다 → [M03 Hands-on Guide](docs/m03-hands-on-guide.md)
+- 코드를 이해하고 싶다 → [M03 Code Reading Guide](docs/m03-code-reading-guide.md)
+- 설계·QA·동료평가 자료가 필요하다 → [M03 Reference](docs/m03-reference.md)
+
+기존 문서는 역사적/상세 참고 자료로 보존한다.
+
+- [User Guide](docs/m03-user-guide.md) — 기존 단계별 사용 설명
+- [Architecture Design](docs/m03-architecture-design.md) — 설계 결정과 요구사항 매트릭스
+- [Final QA Report](docs/m03-final-qa-report.md) — 자동·수동 검증 근거
+- [Peer Evaluation Guide](docs/m03-peer-evaluation-guide.md) — 발표용 질문·시연 순서
 
 ## 테스트
 

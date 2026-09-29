@@ -1,5 +1,9 @@
 # M03 사용설명서 — 나만의 용돈 기입장
 
+> **Historical/reference document.** 처음 실습하는 경우에는 기본 `./data`로
+> 동료평가 데이터까지 만드는 [M03 Hands-on Guide](m03-hands-on-guide.md)를 먼저 읽는다.
+> 코드와 Python 기초는 [M03 Code Reading Guide](m03-code-reading-guide.md)를 참고한다.
+
 이 문서는 [README.md](../README.md)보다 좀 더 친절하게, 처음
 프로그램을 쓰는 사람이 그대로 따라 할 수 있도록 쓴 사용설명서다.
 모든 명령과 예시는 실제 프로그램(`ledger/cli.py`)과 정확히 일치한다.

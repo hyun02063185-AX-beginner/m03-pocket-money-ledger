@@ -1,5 +1,9 @@
 # M03 — 동료평가 대비 가이드
 
+> **Historical/reference document.** 이 문서는 시연 순서와 짧은 답변을 위한 자료다.
+> Python 기초 설명은 [M03 Code Reading Guide](m03-code-reading-guide.md), 전체 시연 데이터
+> 만들기는 [M03 Hands-on Guide](m03-hands-on-guide.md)를 먼저 참고한다.
+
 이 문서는 Codyssey M03 「나만의 용돈 기입장 프로그램」 동료평가에서
 프로젝트 구조와 핵심 Python 개념을 짧고 정확하게 설명하고, 실제로
 시연까지 할 수 있도록 준비한 자료다. 모든 설명은 실제 코드
