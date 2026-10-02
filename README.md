@@ -1,6 +1,10 @@
 # m03-pocket-money-ledger
 
-Codyssey M03 — 나만의 용돈 기입장 프로그램 만들기.
+Codyssey B2-1 — 나만의 용돈 기입장 프로그램 만들기.
+
+> `M03`은 초기 내부 관리번호이며, Codyssey 공식 미션 ID는 `B2-1`이다.
+> 기존 저장소명과 `m03-*` 문서 파일명은 링크 및 이력 호환성을 위해 유지한다.
+> 이후 새 문서는 공식 ID `B2-1`을 기준으로 명명한다.
 
 터미널에서 쓰는 개인 수입/지출 기록 프로그램. Python 3.10+ 표준
 라이브러리만 사용하며, 서드파티 패키지·GUI/웹 UI·데이터베이스를
@@ -152,9 +156,9 @@ python -m ledger import --from export.csv
 
 추천 읽기 순서:
 
-- 처음 사용한다 → [M03 Hands-on Guide](docs/m03-hands-on-guide.md)
-- 코드를 이해하고 싶다 → [M03 Code Reading Guide](docs/m03-code-reading-guide.md)
-- 설계·QA·동료평가 자료가 필요하다 → [M03 Reference](docs/m03-reference.md)
+- 처음 사용한다 → [B2-1 Hands-on Guide](docs/m03-hands-on-guide.md)
+- 코드를 이해하고 싶다 → [B2-1 Code Reading Guide](docs/m03-code-reading-guide.md)
+- 설계·QA·동료평가 자료가 필요하다 → [B2-1 Reference](docs/m03-reference.md)
 
 기존 문서는 역사적/상세 참고 자료로 보존한다.
 

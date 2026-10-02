@@ -1,8 +1,8 @@
-# M03 사용설명서 — 나만의 용돈 기입장
+# B2-1 사용설명서 — 나만의 용돈 기입장
 
 > **Historical/reference document.** 처음 실습하는 경우에는 기본 `./data`로
-> 동료평가 데이터까지 만드는 [M03 Hands-on Guide](m03-hands-on-guide.md)를 먼저 읽는다.
-> 코드와 Python 기초는 [M03 Code Reading Guide](m03-code-reading-guide.md)를 참고한다.
+> 동료평가 데이터까지 만드는 [B2-1 Hands-on Guide](m03-hands-on-guide.md)를 먼저 읽는다.
+> 코드와 Python 기초는 [B2-1 Code Reading Guide](m03-code-reading-guide.md)를 참고한다.
 
 이 문서는 [README.md](../README.md)보다 좀 더 친절하게, 처음
 프로그램을 쓰는 사람이 그대로 따라 할 수 있도록 쓴 사용설명서다.
@@ -383,9 +383,9 @@ python -m ledger export --out 2026-09.csv --month 2026-09
 
 ---
 
-## 21. 직접 따라 해보는 M03 기능 실습
+## 21. 직접 따라 해보는 B2-1 기능 실습
 
-> 이 실습은 실제 사용 데이터를 건드리지 않고 M03의 기능을 하나씩
+> 이 실습은 실제 사용 데이터를 건드리지 않고 B2-1의 기능을 하나씩
 > 직접 실행해보기 위한 연습입니다. 모든 명령은 `./practice-data`
 > (일부는 `./practice-import-data`)를 사용합니다. 위에서 아래로
 > 순서대로 실행하면 됩니다.
@@ -442,7 +442,7 @@ python3 -m ledger export --help
 
 - `-m`은 Python 자체 옵션("뒤의 이름을 module/package로 실행하라").
 - `ledger`는 이 프로젝트의 package.
-- `--data-dir`은 M03에서 정의한 전역 옵션(섹션 4 참고).
+- `--data-dir`은 B2-1에서 정의한 전역 옵션(섹션 4 참고).
 - `--help`는 argparse가 기본 제공하는 도움말 기능.
 
 ### 21.2 실습 데이터 폴더 원칙
@@ -524,7 +524,7 @@ exit code 1로 끝난다. 다음 단계로 바로 넘어가고 싶다면 `Ctrl+C
 이 실습의 목적:
 
 - 거래는 **이미 등록된 카테고리만** 쓸 수 있다.
-- M03은 "식비", "교통" 같은 기본 카테고리를 자동으로 만들어주지
+- B2-1은 "식비", "교통" 같은 기본 카테고리를 자동으로 만들어주지
   않는다(섹션 5, `Option B` 정책).
 
 ### Scenario 3 — 카테고리 만들기
@@ -1314,4 +1314,4 @@ python3 -m ledger list --data-dir ./practice-data; echo $?
 | 문서 | 목적 |
 |---|---|
 | 5분 튜토리얼(섹션 18) | 처음 써 보는 빠른 첫 체험 |
-| 직접 따라 해보는 M03 기능 실습(섹션 21) | 전체 기능 학습, 동료평가/QA 재현용 |
+| 직접 따라 해보는 B2-1 기능 실습(섹션 21) | 전체 기능 학습, 동료평가/QA 재현용 |

@@ -1,10 +1,10 @@
 # `argparse` 모듈 사용 흐름
 
-이 문서는 `ledger/cli.py` 전체를 설명하지 않는다. M03가
+이 문서는 `ledger/cli.py` 전체를 설명하지 않는다. B2-1가
 `import argparse`로 가져온 기능이 **명령을 어떻게 읽고, 어떤 구조를 만들며,
 어느 코드로 이어지는지**만 따라간다.
 
-## 1. `import`와 M03에서의 역할
+## 1. `import`와 B2-1에서의 역할
 
 ```python
 # ledger/cli.py
@@ -14,9 +14,9 @@ import argparse
 `argparse`는 터미널에 입력한 글자를 명령과 옵션으로 해석하는 Python 표준 모듈이다.
 별도로 설치할 필요가 없다.
 
-M03에는 `list`, `summary`, `category add` 같은 여러 명령과 `--limit`,
+B2-1에는 `list`, `summary`, `category add` 같은 여러 명령과 `--limit`,
 `--month` 같은 옵션이 있다. 프로그램은 처음에는 이들을 모두 단순한 글자로
-받는다. `argparse`는 그 글자를 M03 코드가 꺼내 쓸 수 있는 `args` 객체로 바꾼다.
+받는다. `argparse`는 그 글자를 B2-1 코드가 꺼내 쓸 수 있는 `args` 객체로 바꾼다.
 
 ```text
 python3 -m ledger list --limit 5
@@ -27,7 +27,7 @@ python3 -m ledger list --limit 5
              args.limit   = 5
 ```
 
-## 2. M03가 실제로 꺼내 쓰는 기능
+## 2. B2-1가 실제로 꺼내 쓰는 기능
 
 ### `ArgumentParser()` — CLI의 전체 틀 만들기
 
@@ -60,7 +60,7 @@ subparsers = parser.add_subparsers(dest="command", required=True)
 p_list = subparsers.add_parser("list", help="list recent transactions, newest first")
 ```
 
-이 한 줄로 `list`라는 하위 명령의 규칙 상자가 생긴다. M03는 같은 방식으로
+이 한 줄로 `list`라는 하위 명령의 규칙 상자가 생긴다. B2-1는 같은 방식으로
 `add`, `search`, `summary`, `budget`, `category`, `update`, `delete`, `import`,
 `export`도 등록한다. `budget`과 `category`는 그 안에 다시 하위 명령을 둔다.
 예를 들어 `budget set`의 구조도 `add_subparsers()`와 `add_parser("set")`로 만든다.
@@ -152,7 +152,7 @@ ledger [--data-dir 폴더] <명령> [그 명령의 옵션]
 `add_parser()`, `add_argument()` 호출들이 실행될 때 만들어지고,
 `parse_args()`가 실제 입력과 비교해 사용한다.
 
-## 5. M03 코드에서 기억할 연결점
+## 5. B2-1 코드에서 기억할 연결점
 
 ```python
 def cmd_list(args: argparse.Namespace, service: LedgerService) -> None:

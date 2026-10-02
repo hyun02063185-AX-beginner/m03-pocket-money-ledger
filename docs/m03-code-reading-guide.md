@@ -1,7 +1,7 @@
-# M03 코드 읽기 가이드
+# B2-1 코드 읽기 가이드
 
 이 문서는 [Hands-on Guide](m03-hands-on-guide.md)로 명령을 실행한 **다음** 읽는다.
-Python 전체 입문서가 아니라, 내가 방금 본 화면을 M03 코드에서 따라가며 필요한
+Python 전체 입문서가 아니라, 내가 방금 본 화면을 B2-1 코드에서 따라가며 필요한
 Python만 배우는 안내서다.
 
 ```text
@@ -18,7 +18,7 @@ Python만 배우는 안내서다.
 | 터미널 CLI, 파일 I/O, CRUD, 검색, 월 요약·예산, CSV import/export | dataclass, JSONL, Repository/Service 분리 |
 | Generator, Decorator, Type Hint, 오류+힌트, `python -m` | deque, tempfile, `os.replace`, UNSET sentinel |
 
-근거와 PASS 증거는 [M03 Reference](m03-reference.md#요구사항-대응)에 모아 두었다.
+근거와 PASS 증거는 [B2-1 Reference](m03-reference.md#요구사항-대응)에 모아 두었다.
 
 ## 1. Python 프로그램은 어떻게 시작될까?
 
@@ -56,7 +56,7 @@ m03-pocket-money-ledger/
 - **Python 파일** 하나는 보통 **module**이다. 예: `cli.py`는 `ledger.cli` module.
 - Python module을 묶은 폴더가 **package**다. `ledger/` 안의 `__init__.py`가
   Python에게 이 폴더를 package로 인식하게 한다.
-- `-m`은 M03 옵션이 아니라 Python 옵션으로, 파일 경로가 아닌 module/package 이름을
+- `-m`은 B2-1 옵션이 아니라 Python 옵션으로, 파일 경로가 아닌 module/package 이름을
   실행하라는 뜻이다.
 - package를 `-m`으로 실행하면 Python은 그 안의 `__main__.py`를 찾는다. 그래서
   폴더처럼 보이는 `ledger`를 실행할 수 있다.
@@ -109,12 +109,12 @@ cmd_list(args, service)
 이 옵션의 이름과 규칙을 등록한다. 따라서 사용자가 입력한 문자열 `"5"`를 int `5`로
 바꾸고 `args.limit`에 넣는다. `args.limit`의 점은 args 객체의 limit 값을 꺼낸다는 뜻이다.
 
-`--help`는 parser가 사용자에게 보여 주는 안내다. `--data-dir`은 M03의 전역 옵션이고
+`--help`는 parser가 사용자에게 보여 주는 안내다. `--data-dir`은 B2-1의 전역 옵션이고
 서브명령보다 앞에 둔다. parser가 거부한 사용법은 Service까지 가지 않으며 exit code 2다.
 
 ### argparse, Type Hint, Validator는 서로 다르다
 
-| 항목 | 누구를 위한가 | M03 예 |
+| 항목 | 누구를 위한가 | B2-1 예 |
 |---|---|---|
 | CLI help | 프로그램 사용자 | `--amount`의 도움말 |
 | `argparse type=int` | 터미널 문자열 변환 | `"500000" → 500000` |
@@ -131,7 +131,7 @@ def set_budget(month: str, amount: int) -> Budget:
 
 ```text
 CLI는 조작 방식이고 argparse는 입력 해석 도구다.
--m은 Python 옵션, --limit은 M03 옵션이다.
+-m은 Python 옵션, --limit은 B2-1 옵션이다.
 Type Hint는 자동 검증기가 아니다.
 Validator가 실제 값 규칙을 검사한다.
 ```
@@ -224,7 +224,7 @@ next(g)        # 1
 next(g)        # 2
 ```
 
-M03의 Generator는 많은 데이터를 “더 빨리 찾는” 기능이 아니다. 파일은 끝까지 읽는다.
+B2-1의 Generator는 많은 데이터를 “더 빨리 찾는” 기능이 아니다. 파일은 끝까지 읽는다.
 대신 전체 Transaction을 한꺼번에 메모리에 올리지 않고 한 건씩 처리한다. 10만 줄이라도
 list의 보관량은 limit 기준이다.
 
@@ -296,7 +296,7 @@ Decorator가 없으면 각 command handler가 같은 `try/except`, 오류 출력
 
 ```text
 Decorator는 함수·클래스에 기능을 덧붙이는 Python 문법이다.
-@handle_errors는 M03 명령의 공통 오류 처리를 붙인다.
+@handle_errors는 B2-1 명령의 공통 오류 처리를 붙인다.
 @dataclass도 같은 @ 문법이지만 역할은 다르다.
 예상된 앱 오류는 1, argparse 사용법 오류는 2다.
 ```
@@ -310,7 +310,7 @@ Transaction → Repository → JSON 변환 → transactions.jsonl → 프로그�
 ```
 
 메모리 객체는 프로세스가 끝나면 사라지지만 파일은 남는다. 이를 **영속 저장**이라고 한다.
-M03은 아래 세 파일을 기본 `data/`에 둔다.
+B2-1은 아래 세 파일을 기본 `data/`에 둔다.
 
 | 파일 | 한 줄의 내용 |
 |---|---|
@@ -333,7 +333,7 @@ tempfile로 임시 파일 생성
 os.replace로 원본 교체
 ```
 
-원본 파일을 바로 쓰다가 중간 실패하면 비어 있거나 깨질 수 있다. 그래서 M03은 임시 파일을
+원본 파일을 바로 쓰다가 중간 실패하면 비어 있거나 깨질 수 있다. 그래서 B2-1은 임시 파일을
 먼저 완성한 뒤 바꿔치기한다. `os.replace()`는 같은 파일시스템에서 성공한 교체 시 중간
 파일 내용이 보이지 않게 돕는다. 이는 백업, 동시 쓰기 잠금, 모든 전원 장애 보장과는 다르다.
 
@@ -343,7 +343,7 @@ UNSET`이면 기존 값 유지, `memo=""`이면 빈 문자열로 수정된다. �
 
 ## 표준 라이브러리 빠른 참조
 
-| Library | M03에서 하는 일 | 주요 파일 |
+| Library | B2-1에서 하는 일 | 주요 파일 |
 |---|---|---|
 | `argparse` | CLI 명령·옵션 해석 | `cli.py` |
 | `dataclasses` | Transaction 등 데이터 구조 | `models.py` |

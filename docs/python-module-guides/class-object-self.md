@@ -19,11 +19,11 @@ class TransactionRepository:
 `class`는 같은 종류의 객체를 만들기 위한 설계도다. 실제로 만든 값 하나를 object 또는
 instance라고 한다. `self`는 메서드를 호출한 **그 객체 자신**을 가리키는 관례 이름이다.
 
-## 2. M03에서 왜 필요한가
+## 2. B2-1에서 왜 필요한가
 
 장부는 거래 하나의 정보와 파일 저장소의 상태를 분리해야 한다. `Transaction` 객체는 한
 거래의 필드와 변환 규칙을 가진다. `TransactionRepository` 객체는 어느 데이터 폴더와
-파일을 쓰는지를 기억한다. 둘은 M03가 만든 사용자 정의 class다.
+파일을 쓰는지를 기억한다. 둘은 B2-1가 만든 사용자 정의 class다.
 
 ## 3. `repo.iter_all()`에서 `self`
 
@@ -69,10 +69,10 @@ Transaction.from_dict(record) # dict → 객체
 transaction.to_dict()         # 객체 → dict
 ```
 
-dict는 키와 값을 자유롭게 담는 Python 기본 자료구조다. Transaction은 필드가 정해진 M03
+dict는 키와 값을 자유롭게 담는 Python 기본 자료구조다. Transaction은 필드가 정해진 B2-1
 class로, `to_dict()`·`from_dict()` 같은 거래 전용 동작도 함께 가진다.
 
-## 6. M03 코드와 연결
+## 6. B2-1 코드와 연결
 
 - `ledger/models.py`: `Transaction`, `Budget`, `SearchCriteria`, `MonthlySummary`, `ImportResult`.
 - `ledger/repository.py`: 세 Repository class와 각 `self.path`.
@@ -86,6 +86,5 @@ class는 객체를 만들기 위한 설계도다.
 object(instance)는 class로 만든 실제 값 하나다.
 self는 메서드를 호출한 그 객체 자신이다.
 repo.iter_all() 안에서 self는 repo다.
-dict는 범용 자료구조, Transaction은 M03의 거래 전용 객체다.
+dict는 범용 자료구조, Transaction은 B2-1의 거래 전용 객체다.
 ```
-

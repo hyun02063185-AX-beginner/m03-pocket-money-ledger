@@ -1,10 +1,10 @@
-# M03 — 동료평가 대비 가이드
+# B2-1 — 동료평가 대비 가이드
 
 > **Historical/reference document.** 이 문서는 시연 순서와 짧은 답변을 위한 자료다.
-> Python 기초 설명은 [M03 Code Reading Guide](m03-code-reading-guide.md), 전체 시연 데이터
-> 만들기는 [M03 Hands-on Guide](m03-hands-on-guide.md)를 먼저 참고한다.
+> Python 기초 설명은 [B2-1 Code Reading Guide](m03-code-reading-guide.md), 전체 시연 데이터
+> 만들기는 [B2-1 Hands-on Guide](m03-hands-on-guide.md)를 먼저 참고한다.
 
-이 문서는 Codyssey M03 「나만의 용돈 기입장 프로그램」 동료평가에서
+이 문서는 Codyssey B2-1 「나만의 용돈 기입장 프로그램」 동료평가에서
 프로젝트 구조와 핵심 Python 개념을 짧고 정확하게 설명하고, 실제로
 시연까지 할 수 있도록 준비한 자료다. 모든 설명은 실제 코드
 (`ledger/*.py`)와 [README.md](../README.md),
@@ -383,7 +383,7 @@ N개만 유지하는 `deque` 스트리밍 방식과 충돌하기 때문에 의�
 설명했다. 이 섹션은 그 설명을 읽는 데 필요한 더 기초적인 Python/CLI
 개념을 정리한 것이다. Python이나 CLI가 처음이라면 여기부터 읽고,
 이미 익숙하다면 바로 예상 질문 섹션으로 건너뛰어도 된다. 흐름은
-전부 동일하다: **개념이 무엇인지 → M03 어디에 썼는지 → 코드를 볼 때
+전부 동일하다: **개념이 무엇인지 → B2-1 어디에 썼는지 → 코드를 볼 때
 무엇을 보면 되는지.**
 
 ### 17.1 `python3 -m ledger` 명령 한 줄 분해
@@ -399,15 +399,15 @@ python3 -m ledger --data-dir ./test-data list --limit 5
 | `python3` | Python 실행 프로그램 자체 |
 | `-m` | Python 자체 옵션. "뒤에 오는 이름을 module/package로 실행하라"는 뜻 |
 | `ledger` | 이 프로젝트의 Python package(`ledger/` 디렉터리). `-m ledger`로 실행하면 `ledger/__main__.py`가 진입점이 된다 |
-| `--data-dir ./test-data` | M03에서 `ledger/cli.py`가 직접 정의한 전역 CLI 옵션 |
-| `list` | M03에서 정의한 subcommand |
+| `--data-dir ./test-data` | B2-1에서 `ledger/cli.py`가 직접 정의한 전역 CLI 옵션 |
+| `list` | B2-1에서 정의한 subcommand |
 | `--limit 5` | `list` subcommand에만 정의된 option과 그 값 |
 
 **`python3 main.py`와 `python3 -m ledger`의 차이**:
 
 - `python3 main.py` — [main.py](../main.py)라는 파일을 직접 실행. 파일 하나만 있으면 되고, 그 안에서 `ledger.cli.main()`을 불러 쓴다.
 - `python3 -m ledger` — `ledger` package를 module로 실행. Python이 `ledger/__main__.py`를 찾아 실행한다.
-- 이 프로젝트는 두 방식 모두 결과적으로 같은 [ledger/cli.py](../ledger/cli.py)의 `main()`을 호출하도록 만들어져 있지만, **현재 M03의 정식(canonical) 실행 방식은 `python -m ledger`다.**
+- 이 프로젝트는 두 방식 모두 결과적으로 같은 [ledger/cli.py](../ledger/cli.py)의 `main()`을 호출하도록 만들어져 있지만, **현재 B2-1의 정식(canonical) 실행 방식은 `python -m ledger`다.**
 
 관련 실제 파일: [main.py](../main.py), [ledger/\_\_main\_\_.py](../ledger/__main__.py), [ledger/cli.py](../ledger/cli.py).
 
@@ -433,7 +433,7 @@ CLI = Command-Line Interface(명령줄 인터페이스). GUI와 대비하면
 | GUI | 버튼을 클릭하고 마우스로 조작한다 |
 | CLI | 터미널에 명령어와 옵션을 문자로 입력한다 |
 
-M03은 화면(GUI) 없이 터미널 자체를 사용자 인터페이스로 쓴다:
+B2-1은 화면(GUI) 없이 터미널 자체를 사용자 인터페이스로 쓴다:
 
 ```bash
 python -m ledger list --limit 5
@@ -458,7 +458,7 @@ python -m ledger search --category food --type expense
 | option | `--type` | 또 다른 조건 |
 | option value | `expense` | 그 조건의 값 |
 
-현재 M03의 subcommand 10개: `add`, `list`, `search`, `summary`,
+현재 B2-1의 subcommand 10개: `add`, `list`, `search`, `summary`,
 `budget`, `category`, `update`, `delete`, `import`, `export`.
 
 이 중 `budget`, `category`는 그 아래에 다시 subcommand를 갖는
@@ -476,7 +476,7 @@ Unix/Linux 계열 CLI 프로그램에서 널리 쓰이는 관례다. `--help`,
 
 **개발자가 직접 정의하는 부분**: `--data-dir`, `--limit`,
 `--month`, `--category`처럼 정확히 어떤 이름을 쓸지, 무슨 뜻으로
-쓸지는 이 프로그램을 만든 사람이 정한다. M03에서는 기능
+쓸지는 이 프로그램을 만든 사람이 정한다. B2-1에서는 기능
 요구사항을 바탕으로 이름을 정했고, 실제 등록은
 [ledger/cli.py](../ledger/cli.py)의 `argparse` 설정(`add_argument()`
 호출들)에서 이루어진다.
@@ -496,7 +496,7 @@ Unix/Linux 계열 CLI 프로그램에서 널리 쓰이는 관례다. `--help`,
 - `--help`를 자동으로 만들어 줌
 - 사용법이 잘못되면 usage 메시지를 출력하고 **exit code 2**로 종료
 
-M03에서 `--data-dir`, `--limit`, `--month`, `--id` 등을 정의하는
+B2-1에서 `--data-dir`, `--limit`, `--month`, `--id` 등을 정의하는
 곳이 전부 [ledger/cli.py](../ledger/cli.py)의 `build_parser()`다.
 `--help`는 우리가 직접 구현한 게 아니라 argparse가 기본으로
 제공하는 기능이다.
@@ -512,7 +512,7 @@ M03에서 `--data-dir`, `--limit`, `--month`, `--id` 등을 정의하는
 임시 디렉터리를 만들어 격리된 상태로 검증하기 쉬워진다. 즉
 Repository가 특정 폴더 하나에 고정돼 있지 않다.
 
-이 옵션은 Python 자체가 제공하는 옵션이 아니라, M03에서
+이 옵션은 Python 자체가 제공하는 옵션이 아니라, B2-1에서
 argparse로 직접 정의한 **전역 옵션**이다([ledger/cli.py](../ledger/cli.py)
 `build_parser()`의 `parser.add_argument("--data-dir", ...)`). 전역
 옵션이라 subcommand보다 **앞**에 와야 한다:
@@ -522,7 +522,7 @@ python -m ledger --data-dir ./test-data list   # 올바른 사용
 python -m ledger list --data-dir ./test-data   # 현재 구현에서는 잘못된 사용
 ```
 
-### 17.8 M03에서 DB를 사용했는가?
+### 17.8 B2-1에서 DB를 사용했는가?
 
 **결론: 사용하지 않았다.** MySQL, PostgreSQL은 물론 SQLite 기반
 저장도 쓰지 않았다.
@@ -530,11 +530,11 @@ python -m ledger list --data-dir ./test-data   # 현재 구현에서는 잘못�
 현재 구조와 일반적인 DB 애플리케이션 구조를 나란히 놓으면:
 
 ```
-M03:        CLI → Service → Repository → JSONL 파일
+B2-1:        CLI → Service → Repository → JSONL 파일
 일반 DB 앱:  CLI → Service → Repository → Database
 ```
 
-즉 M03에서는 Database가 있어야 할 자리에 JSONL 파일이 있다고
+즉 B2-1에서는 Database가 있어야 할 자리에 JSONL 파일이 있다고
 이해하면 된다.
 
 **왜 DB를 쓰지 않았는가**: 미션 요구사항이 파일 기반 저장(JSONL
@@ -550,7 +550,7 @@ Repository 계층을 Service와 분리해 둔 덕분에(섹션 10 참고), 저�
 
 초심자가 자주 헷갈리는 구분이다.
 
-| 구분 | M03 사례 | 의미 |
+| 구분 | B2-1 사례 | 의미 |
 |---|---|---|
 | Python 언어 기능 | Generator / `yield` | Python 문법 자체(설치 불필요, 언어에 내장) |
 | Python 언어 기능 | Type Hint 문법(`int \| None` 등) | Python 코드에 타입을 표기하는 문법 |
@@ -566,7 +566,7 @@ Repository 계층을 Service와 분리해 둔 덕분에(섹션 10 참고), 저�
 | 표준 라이브러리 | `unittest` | 테스트 작성/실행 |
 
 **표준 라이브러리**는 Python을 설치하면 자동으로 함께 들어 있는
-모듈들이라 `pip install` 같은 별도 설치가 필요 없다. M03은 이
+모듈들이라 `pip install` 같은 별도 설치가 필요 없다. B2-1은 이
 표준 라이브러리만으로 구현됐다(섹션 23의 예상 질문 참고).
 
 ### 17.10 dataclass, 초심자용 보충 설명 (→ 4번 섹션과 함께 읽기)
@@ -598,7 +598,7 @@ transaction["amount"]   # dict라면 이렇게 키로 접근
 transaction.amount      # dataclass는 속성으로 접근
 ```
 
-M03에서 dataclass의 역할: **저장 기술이 아니다. DB도 아니다.**
+B2-1에서 dataclass의 역할: **저장 기술이 아니다. DB도 아니다.**
 거래 하나(또는 예산, 검색 조건 등)의 "형태(shape)"를 코드로
 표현한 것뿐이다. 실제 저장은 여전히 JSONL 파일이 담당한다.
 
@@ -612,7 +612,7 @@ M03에서 dataclass의 역할: **저장 기술이 아니다. DB도 아니다.**
 ### 17.11 `deque(maxlen=N)`, 초심자용 보충 설명 (→ 6번 섹션과 함께 읽기)
 
 `deque`는 "덱"이라고 읽는다. 일반적으로는 양쪽 끝에서 넣고 뺄 수
-있는 큐 자료구조지만, M03에서 중요한 건 그 자체보다
+있는 큐 자료구조지만, B2-1에서 중요한 건 그 자체보다
 `deque(maxlen=N)` 옵션이다.
 
 `maxlen=3`인 deque에 1, 2, 3, 4, 5를 순서대로 넣으면:
@@ -625,7 +625,7 @@ M03에서 dataclass의 역할: **저장 기술이 아니다. DB도 아니다.**
 5 → [3, 4, 5]
 ```
 
-즉 **"최근 N개만 자동으로 기억하는 대기열"**이다. M03의
+즉 **"최근 N개만 자동으로 기억하는 대기열"**이다. B2-1의
 `list --limit 3`이 정확히 이 동작과 연결된다(실제 위치와 이유는
 6번 섹션 참고).
 
@@ -666,7 +666,7 @@ def values():
   "보존"한다. 다음에 값을 요청받으면 멈췄던 지점부터 이어서
   실행한다.
 
-M03에서는 이런 식으로 한 건씩 받아 처리한다:
+B2-1에서는 이런 식으로 한 건씩 받아 처리한다:
 
 ```python
 for transaction in repository.iter_all():
@@ -687,7 +687,7 @@ for transaction in repository.iter_all():
 |---|---|---|
 | 100만 건을 읽을 때 | 100만 건을 전부 메모리에 올린 뒤 처리 | 1건 읽기 → 처리 → 다음 1건 읽기 → 처리 → ... |
 
-M03의 실제 사례로 시간(time)과 메모리(memory)를 나눠서 보면:
+B2-1의 실제 사례로 시간(time)과 메모리(memory)를 나눠서 보면:
 
 - `list --limit 5` — 시간은 파일 전체를 읽으므로 O(N), 메모리는
   `deque`에 5개만 보관하므로 O(5).
@@ -705,12 +705,12 @@ M03의 실제 사례로 시간(time)과 메모리(memory)를 나눠서 보면:
 
 둘 다 Python **표준 라이브러리**다.
 
-**`tempfile`**: 안전하게 임시 파일을 만들기 위한 모듈. M03에서는
+**`tempfile`**: 안전하게 임시 파일을 만들기 위한 모듈. B2-1에서는
 원본 거래 파일을 바로 덮어쓰지 않고, 새 내용을 먼저 임시 파일에
 작성하기 위해 쓴다.
 
 **`os`**: 운영체제(Operating System) 관련 기능을 제공하는 모듈.
-M03에서 핵심적으로 쓰는 두 함수:
+B2-1에서 핵심적으로 쓰는 두 함수:
 
 - `os.fsync()` — 파일 내용이 저장장치(디스크)에 실제로 반영되도록
   운영체제에 요청한다. (그 앞에 호출되는 `flush()`는 Python
@@ -727,7 +727,7 @@ M03에서 핵심적으로 쓰는 두 함수:
 
 코드 리뷰 관점에서 중요한 질문이다.
 
-**안전하지 않은 방식**(M03이 쓰지 않은 방식):
+**안전하지 않은 방식**(B2-1이 쓰지 않은 방식):
 
 ```
 원본 파일을 쓰기 모드(w)로 연다
@@ -736,7 +736,7 @@ M03에서 핵심적으로 쓰는 두 함수:
 → 원본도 이미 손상된 상태로 남는다
 ```
 
-**M03이 실제로 쓰는 방식**:
+**B2-1이 실제로 쓰는 방식**:
 
 ```
 원본은 그대로 둔다
@@ -929,7 +929,7 @@ os.replace()로 임시 파일을 원본 위치로 교체
 - 코드: [ledger/cli.py](../ledger/cli.py) `build_parser()`
 
 **29. `--data-dir`는 Python이 원래 제공하는 옵션인가요?**
-- 10초: "아니요. Python 자체 옵션이 아니라 M03에서 argparse로
+- 10초: "아니요. Python 자체 옵션이 아니라 B2-1에서 argparse로
   직접 만든 전역 옵션입니다. Python이 원래 제공하는 옵션은
   `-m`처럼 `python` 명령 자체에 붙는 것들입니다."
 - 코드: [ledger/cli.py](../ledger/cli.py) `build_parser()`의
@@ -977,7 +977,7 @@ os.replace()로 임시 파일을 원본 위치로 교체
 
 **35. `tempfile`/`os`는 파일 안전성에 어떻게 기여하나요?**
 - 30초: "원본 파일을 직접 열어 덮어쓰면, 쓰는 도중 프로그램이
-  죽었을 때 원본이 반쯤 쓰인 상태로 손상될 수 있습니다. M03은
+  죽었을 때 원본이 반쯤 쓰인 상태로 손상될 수 있습니다. B2-1은
   대신 `tempfile.mkstemp()`로 같은 디렉터리에 임시 파일을 만들어
   새 내용을 전부 쓴 뒤, `flush()`와 `os.fsync()`로 디스크에
   반영을 확인하고, 마지막에 `os.replace()`로 임시 파일을 원본

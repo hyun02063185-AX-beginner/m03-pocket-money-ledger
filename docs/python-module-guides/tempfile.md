@@ -14,10 +14,10 @@ fd, tmp_name = tempfile.mkstemp(
 ```
 
 `tempfile`은 Python 표준 모듈이다. `mkstemp()`는 고유한 임시 파일을 만들고, 열린 파일
-설명자 `fd`와 그 파일명의 문자열을 돌려준다. `tmp_path = Path(tmp_name)`으로 M03는 경로
+설명자 `fd`와 그 파일명의 문자열을 돌려준다. `tmp_path = Path(tmp_name)`으로 B2-1는 경로
 객체로 바꾼다.
 
-## 2. M03에서 왜 필요한가
+## 2. B2-1에서 왜 필요한가
 
 수정·삭제는 JSONL 파일 전체를 다시 써야 한다. 원본을 바로 비우고 쓰다가 오류가 나면
 데이터가 반쯤만 남을 수 있다. 그래서 먼저 임시 파일에 완성본을 만들고, 다 쓴 뒤에만
@@ -61,10 +61,10 @@ os.replace(임시 파일, 원본 파일)
 ## 5. 만들어지는 객체·구조
 
 `mkstemp()`는 `(fd, tmp_name)` 튜플을 돌려준다. `fd`는 숫자 파일 설명자이고,
-`tmp_path`는 M03의 지역 변수에 담긴 Python `Path` 객체다. 임시 파일 내용은 최종 JSONL
+`tmp_path`는 B2-1의 지역 변수에 담긴 Python `Path` 객체다. 임시 파일 내용은 최종 JSONL
 또는 CSV의 후보본이다.
 
-## 6. M03 코드와 연결
+## 6. B2-1 코드와 연결
 
 `ledger/repository.py`의 `_atomic_write_jsonl()`은 Transaction update/delete,
 Category remove, Budget set/remove가 공유한다. `ledger/services.py`의 `export_csv()`도

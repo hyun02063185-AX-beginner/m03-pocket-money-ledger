@@ -1,9 +1,9 @@
 # `csv` 모듈 사용 흐름
 
-이 문서는 M03의 CSV 가져오기·내보내기에서 **CSV 행 → dict → Transaction**으로 이어지는
+이 문서는 B2-1의 CSV 가져오기·내보내기에서 **CSV 행 → dict → Transaction**으로 이어지는
 방향과 그 반대 방향을 설명한다.
 
-## 1. import와 M03에서의 역할
+## 1. import와 B2-1에서의 역할
 
 ```python
 # ledger/services.py
@@ -12,7 +12,7 @@ import csv
 CSV_FIELDNAMES = ["date", "type", "category", "amount", "memo", "tags"]
 ```
 
-`csv`는 Python 표준 모듈이다. CSV는 열 이름이 있는 표 형식이고, M03는 내부 JSONL과
+`csv`는 Python 표준 모듈이다. CSV는 열 이름이 있는 표 형식이고, B2-1는 내부 JSONL과
 별도로 다른 프로그램과 주고받을 교환 형식으로 사용한다. CSV에는 내부 `id`를 넣지
 않는다.
 
@@ -67,10 +67,10 @@ CSV 한 행
 ## 5. 만들어지는 객체·구조
 
 CSV 행은 `dict[str, str]`처럼 시작한다. 검증 뒤에는 `Transaction` 객체가 되고, 가져오기
-결과는 `ImportResult(imported, skipped, errors)` 객체가 된다. `Transaction`은 M03가 만든
+결과는 `ImportResult(imported, skipped, errors)` 객체가 된다. `Transaction`은 B2-1가 만든
 모델이고, `DictReader`·`DictWriter`는 Python `csv`가 제공한다.
 
-## 6. M03 코드와 연결
+## 6. B2-1 코드와 연결
 
 `ledger/services.py`의 `import_csv()`와 `export_csv()`가 이 흐름의 중심이다. CLI는
 `cmd_import()`/`cmd_export()`에서 Path를 서비스로 전달할 뿐이고, CSV 규칙은 Service에 있다.
@@ -82,6 +82,5 @@ DictReader는 CSV 한 행을 헤더 이름 기반 dict로 읽는다.
 CSV에서 읽은 값은 처음에는 글자이므로 검증·변환이 필요하다.
 add_transaction()을 재사용해 CSV도 같은 업무 규칙을 지킨다.
 DictWriter는 dict 한 개를 정해진 열 순서의 CSV 행으로 쓴다.
-M03 CSV에는 내부 Transaction id를 넣지 않는다.
+B2-1 CSV에는 내부 Transaction id를 넣지 않는다.
 ```
-

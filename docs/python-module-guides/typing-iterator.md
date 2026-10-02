@@ -14,7 +14,7 @@ def iter_all(self) -> Iterator[Transaction]:
 ```
 
 `Iterator`는 Python의 `typing` 모듈이 제공하는 타입 표기다. `Transaction`은 Python에
-원래 있는 타입이 아니라 `ledger.models`에서 M03가 만든 class다.
+원래 있는 타입이 아니라 `ledger.models`에서 B2-1가 만든 class다.
 
 ## 2. Type Hint란 무엇인가
 
@@ -36,7 +36,7 @@ def iter_all(...) -> Iterator[Transaction]:
 
 ```text
 Iterator        = next()로 다음 값을 하나씩 꺼낼 수 있는 Python의 반복 객체
-[Transaction]   = 꺼낼 값의 예상 타입이 M03 Transaction 객체
+[Transaction]   = 꺼낼 값의 예상 타입이 B2-1 Transaction 객체
 ```
 
 따라서 `iter_all()`은 Transaction 목록을 즉시 만드는 함수가 아니라, 다음 거래를 요청할
@@ -68,7 +68,7 @@ Iterator[Transaction]을 쓰는 for 문으로 전달
 호출 결과는 `Iterator[Transaction]`이라는 type hint에 맞는 Generator 객체다. 실제 거래는
 호출 직후 전부 생성되지 않고, 반복할 때 `Transaction` 객체 하나씩 만들어진다.
 
-## 6. M03 코드와 연결
+## 6. B2-1 코드와 연결
 
 `ledger/repository.py`의 `_iter_jsonl()`은 `Iterator[dict]`, `iter_all()`은
 `Iterator[Transaction]`으로 표기한다. `LedgerService`의 목록·검색·요약·CSV 내보내기는
@@ -80,6 +80,6 @@ Iterator[Transaction]을 쓰는 for 문으로 전달
 Type Hint는 Python 코드의 예상 타입을 적는 설명이다.
 -> T는 함수가 T를 돌려준다는 뜻이다.
 Iterator는 next()나 for로 값을 하나씩 꺼내는 Python 반복 객체다.
-Transaction은 M03가 만든 사용자 정의 class다.
+Transaction은 B2-1가 만든 사용자 정의 class다.
 argparse type=int는 실행 변환이고 amount: int는 타입 표기다.
 ```

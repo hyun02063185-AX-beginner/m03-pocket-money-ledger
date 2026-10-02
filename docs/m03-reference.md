@@ -1,4 +1,4 @@
-# M03 Reference
+# B2-1 Reference
 
 이 문서는 첫 실습용 문서가 아니다. [Hands-on Guide](m03-hands-on-guide.md)와
 [Code Reading Guide](m03-code-reading-guide.md)를 마친 뒤, 설계 근거·검증 증거·

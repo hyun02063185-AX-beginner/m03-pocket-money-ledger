@@ -13,12 +13,12 @@ def iter_all(self) -> Iterator[Transaction]:
 
 함수 본문에 `yield`가 있으면 Python은 일반 함수처럼 한 번에 `return`하지 않는다. 호출할
 때 **Generator 객체**를 만들고, `next()`나 `for`가 다음 값을 요청할 때까지 실행을 멈춘다.
-`yield`와 Generator는 Python 기능이고, `iter_all()`과 `_iter_jsonl()`은 M03가 만든 함수다.
+`yield`와 Generator는 Python 기능이고, `iter_all()`과 `_iter_jsonl()`은 B2-1가 만든 함수다.
 
-## 2. M03에서 왜 필요한가
+## 2. B2-1에서 왜 필요한가
 
 거래 파일은 커질 수 있다. `list`나 `summary`가 `list(self.iter_all())`처럼 먼저 전부
-읽으면 메모리에 모든 거래를 올려야 한다. M03는 필요한 처리와 함께 한 줄씩 읽어
+읽으면 메모리에 모든 거래를 올려야 한다. B2-1는 필요한 처리와 함께 한 줄씩 읽어
 Generator의 장점을 쓴다.
 
 ## 3. JSONL에서 Transaction까지
@@ -67,11 +67,11 @@ list:       호출 시 모든 항목을 저장해 즉시 접근·여러 번 순�
 Generator:  요청할 때 하나씩 만들므로 메모리가 적게 들지만 한 번 소비하면 끝남
 ```
 
-M03의 `list_transactions()`는 Generator 전체를 저장하지 않고 `deque(maxlen=limit)`에 최근
+B2-1의 `list_transactions()`는 Generator 전체를 저장하지 않고 `deque(maxlen=limit)`에 최근
 N건만 둔다. 반면 `search()`는 모든 일치 결과를 최신순으로 돌려줘야 하므로 일치한 항목을
 list에 모은다. Generator가 항상 list보다 좋은 것이 아니라 목적에 맞게 고른 것이다.
 
-## 6. 실제 M03 코드와 연결
+## 6. 실제 B2-1 코드와 연결
 
 `iter_all()`을 다음 코드가 소비한다.
 
@@ -85,8 +85,7 @@ list에 모은다. Generator가 항상 list보다 좋은 것이 아니라 목적
 ```text
 yield가 있는 함수는 호출 시 Generator 객체를 돌려준다.
 Generator는 Iterator이므로 next()와 for로 하나씩 소비한다.
-M03는 JSONL 한 줄을 dict, 이어서 Transaction으로 바꿔 yield한다.
+B2-1는 JSONL 한 줄을 dict, 이어서 Transaction으로 바꿔 yield한다.
 모든 거래를 list로 만들지 않아 큰 파일에서도 메모리를 아낀다.
 Generator는 한 번 소비하면 끝나며, 필요한 경우에만 list나 deque로 모은다.
 ```
-

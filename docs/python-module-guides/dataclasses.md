@@ -1,6 +1,6 @@
 # `dataclasses`와 모델 객체 사용 흐름
 
-이 문서는 `@dataclass`가 M03의 `Transaction`, `Budget`, `MonthlySummary` 같은 모델을
+이 문서는 `@dataclass`가 B2-1의 `Transaction`, `Budget`, `MonthlySummary` 같은 모델을
 어떻게 만드는지 설명한다.
 
 ## 1. import와 문법
@@ -21,10 +21,10 @@ class Transaction:
 ```
 
 `dataclass`는 Python이 제공하는 class 작성 도우미다. 필드를 선언하면 객체를 만들기 위한
-`__init__`과 보기 좋은 표현·비교 같은 기본 기능을 만들어 준다. `Transaction`은 M03가
+`__init__`과 보기 좋은 표현·비교 같은 기본 기능을 만들어 준다. `Transaction`은 B2-1가
 정의한 사용자 모델이다.
 
-## 2. M03에서 왜 필요한가
+## 2. B2-1에서 왜 필요한가
 
 거래를 일반 `dict`로만 다루면 키 이름을 계속 문자열로 써야 하고, `"date"`가 날짜인지
 금액인지 코드가 덜 분명해진다. `Transaction`은 `transaction.amount`, `transaction.date`
@@ -69,7 +69,7 @@ JSONL 저장용 dict
 - `MonthlySummary`: Service가 계산한 결과이며 파일에 저장하지 않는다.
 - `ImportResult`: CSV 가져오기 성공·건너뜀·오류 정보를 담는다.
 
-## 6. M03 코드와 연결
+## 6. B2-1 코드와 연결
 
 `ledger/models.py`가 모델을 정의한다. `LedgerService.add_transaction()`과
 `update_transaction()`이 Transaction을 만들고, `TransactionRepository`가 `to_dict()`과
@@ -79,9 +79,8 @@ JSONL 저장용 dict
 
 ```text
 @dataclass는 필드 중심의 class를 편하게 만든다.
-Transaction은 Python 기본 내장형이 아니라 M03가 만든 사용자 정의 class다.
+Transaction은 Python 기본 내장형이 아니라 B2-1가 만든 사용자 정의 class다.
 객체 안에서는 transaction.date처럼 필드를 사용한다.
 저장할 때는 to_dict(), 읽을 때는 from_dict()를 쓴다.
 default_factory=list는 객체마다 독립된 tags 목록을 만든다.
 ```
-

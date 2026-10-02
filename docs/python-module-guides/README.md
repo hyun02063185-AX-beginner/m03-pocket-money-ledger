@@ -1,8 +1,8 @@
-# M03 Python 읽기 가이드
+# B2-1 Python 읽기 가이드
 
-이 폴더는 파일 하나를 처음부터 끝까지 해설하는 문서가 아니다. M03 소스에서 만나는
-`import X` 또는 Python 문법 하나를 골라, **Python이 제공한 것**과 **M03가 만든 것**을
-나누고 실제 실행 흐름을 따라간다. `Transaction`, `iter_all()`, `_iter_jsonl()`은 M03가
+이 폴더는 파일 하나를 처음부터 끝까지 해설하는 문서가 아니다. B2-1 소스에서 만나는
+`import X` 또는 Python 문법 하나를 골라, **Python이 제공한 것**과 **B2-1가 만든 것**을
+나누고 실제 실행 흐름을 따라간다. `Transaction`, `iter_all()`, `_iter_jsonl()`은 B2-1가
 만든 이름이고, `Path`, `Iterator`, `yield`는 Python이 제공한 기능이다.
 
 ## 추천 학습 순서
@@ -23,4 +23,3 @@
 
 - [`class, object, self`](class-object-self.md) — `repo.iter_all()`의 `self`가 무엇인지.
 - [`type hint`](type-hint.md) — `name: str`, `-> Budget`처럼 붙은 설명을 읽는 법.
-
