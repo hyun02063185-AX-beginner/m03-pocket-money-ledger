@@ -1,1 +1,1 @@
-"""Pocket money ledger package (design-stage skeleton)."""
+"""용돈 기입장 패키지 (설계 단계 스켈레톤)."""

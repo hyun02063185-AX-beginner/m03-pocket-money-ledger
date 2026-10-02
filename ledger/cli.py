@@ -1,13 +1,13 @@
-"""argparse + interactive CLI — the real Sprint 3 implementation.
+"""argparse + 대화형 CLI — Sprint 3의 실제 구현.
 
-Translates argv/interactive input() <-> LedgerService calls, and
-formats output (including id -> "TX-000012" display, section 8). No
-business logic lives here — every validation and calculation call
-goes through ledger.validators or LedgerService; this module only
-decides *when* to call them and how to show the result or error
-(docs/m03-architecture-design.md section 43). The one narrow exception
-is `update`'s "at least one field supplied" check (section 15/28):
-that is post-parse argument-shape validation, not a business rule.
+argv/대화형 input() 입력을 LedgerService 호출로 변환하고, 출력
+형식을 맞춘다(id -> "TX-000012" 표시 포함, 8번 섹션). 이 모듈에는
+업무 로직이 전혀 없다 — 모든 검증과 계산 호출은 ledger.validators나
+LedgerService를 거치며, 이 모듈은 *언제* 그것들을 호출하고 결과나
+오류를 어떻게 보여줄지만 결정한다(docs/m03-architecture-design.md
+43번 섹션). 유일한 예외는 `update`의 "최소 하나의 필드가
+지정되었는지" 검사다(15/28번 섹션) — 이는 파싱 이후의 인자 형태
+검증이지 업무 규칙이 아니다.
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ DEFAULT_SUMMARY_TOP = 3
 _PROMPT_ATTEMPTS = 3
 
 
-# -- argument parsing --------------------------------------------------------------
+# -- 인자 파싱 --------------------------------------------------------------
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -50,7 +50,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    # add: no options besides --help — primarily interactive (section 9).
+    # add: --help 외에는 옵션이 없음 — 기본적으로 대화형으로 진행(9번 섹션).
     subparsers.add_parser("add", help="add a transaction via interactive prompts")
 
     p_list = subparsers.add_parser("list", help="list recent transactions, newest first")
@@ -93,8 +93,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_delete.add_argument("--id", type=int, required=True)
 
     p_import = subparsers.add_parser("import", help="import transactions from a CSV file")
-    # "from" is a Python keyword, so it can't be the attribute name
-    # argparse would otherwise infer from "--from" — dest="source" sidesteps that.
+    # "from"은 파이썬 예약어라서 argparse가 "--from"에서 자동으로
+    # 추론하는 속성 이름으로 쓸 수 없다 — dest="source"로 이를 피한다.
     p_import.add_argument("--from", dest="source", type=Path, required=True)
 
     p_export = subparsers.add_parser("export", help="export transactions to a CSV file")
@@ -106,13 +106,13 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-# -- small formatting/parsing helpers, shared by add/update -------------------------
+# -- add/update에서 공유하는 소규모 포맷팅/파싱 헬퍼 -------------------------------
 
 
 def format_transaction_id(transaction_id: int) -> str:
-    """Display-only formatting — never stored, never passed back into
-    LedgerService/repository code (docs/m03-architecture-design.md
-    section 10)."""
+    """표시 전용 포맷팅 — 저장되지 않으며 LedgerService/repository
+    코드로 다시 전달되지도 않는다(docs/m03-architecture-design.md
+    10번 섹션)."""
     return f"TX-{transaction_id:06d}"
 
 
@@ -132,7 +132,7 @@ def _print_error(exc: LedgerError) -> None:
     print(f"[힌트] {hint}", file=sys.stderr)
 
 
-# -- interactive prompts (used by `add`) ---------------------------------------------
+# -- 대화형 프롬프트 (`add`에서 사용) ---------------------------------------------
 
 
 def _prompt_date(attempts: int = _PROMPT_ATTEMPTS) -> str:
@@ -184,7 +184,7 @@ def _prompt_tags() -> list[str]:
     return parse_tags(input("태그 (쉼표로 구분, 선택): "))
 
 
-# -- command handlers ------------------------------------------------------------------
+# -- 명령어 핸들러 ------------------------------------------------------------------
 
 
 def cmd_add(args: argparse.Namespace, service: LedgerService) -> None:
@@ -316,7 +316,7 @@ def cmd_export(args: argparse.Namespace, service: LedgerService) -> None:
     print(f"[완료] {args.out} ({count} records)")
 
 
-# -- composition + dispatch --------------------------------------------------------------
+# -- 조립 + 디스패치 --------------------------------------------------------------
 
 
 def _build_service(data_dir: Path) -> LedgerService:
@@ -329,11 +329,10 @@ def _build_service(data_dir: Path) -> LedgerService:
 
 @handle_errors
 def _dispatch(args: argparse.Namespace) -> None:
-    """The single point handle_errors is applied to — every command
-    handler's LedgerError propagates up to here uncaught, gets turned
-    into "[오류]/[힌트]" + exit code 1 in one place, instead of each
-    handler repeating its own try/except (docs/m03-architecture-design.md
-    section 41)."""
+    """handle_errors가 적용되는 단 하나의 지점 — 각 명령어 핸들러에서
+    발생한 LedgerError는 잡히지 않은 채 이곳까지 전파되어, 각 핸들러가
+    각자 try/except를 반복하는 대신 한 곳에서 "[오류]/[힌트]" + 종료
+    코드 1로 변환된다(docs/m03-architecture-design.md 41번 섹션)."""
     service = _build_service(args.data_dir)
     if args.command == "add":
         cmd_add(args, service)
@@ -364,12 +363,12 @@ def _dispatch(args: argparse.Namespace) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Returns an exit code (0 success, 1 application error) rather
-    than calling sys.exit() itself, so it stays directly testable:
-    `main([...])` can be called in-process and its return value
-    asserted on. argparse's own usage-error/--help paths still raise
-    SystemExit(2)/SystemExit(0) as normal — main() does not intercept
-    those (docs/m03-architecture-design.md section 45)."""
+    """스스로 sys.exit()을 호출하지 않고 종료 코드(성공 0, 애플리케이션
+    오류 1)를 반환한다. 그래야 직접 테스트하기 쉬워진다:
+    `main([...])`을 같은 프로세스 안에서 호출해 반환값을 그대로
+    검증할 수 있다. argparse 자체의 사용법 오류/--help 경로는 평소처럼
+    SystemExit(2)/SystemExit(0)을 그대로 발생시킨다 — main()은 이를
+    가로채지 않는다(docs/m03-architecture-design.md 45번 섹션)."""
     parser = build_parser()
     args = parser.parse_args(argv)
     return _dispatch(args)

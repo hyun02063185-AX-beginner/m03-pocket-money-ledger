@@ -1,7 +1,8 @@
-"""Cross-cutting decorators — and the error-to-message mapping the one
-decorator (plus the interactive add/update retry prompts in cli.py)
-both use, so there is exactly one place that owns "[오류]/[힌트]"
-wording (docs/m03-architecture-design.md section 42).
+"""여러 곳에서 공통으로 쓰이는 데코레이터 — 그리고 이 데코레이터와
+(cli.py의 대화형 add/update 재시도 프롬프트)가 함께 사용하는
+오류-메시지 매핑. 그래서 "[오류]/[힌트]" 문구를 책임지는 곳이
+정확히 한 곳만 존재한다(docs/m03-architecture-design.md 42번
+섹션).
 """
 
 from __future__ import annotations
@@ -64,15 +65,15 @@ _ERROR_MESSAGES: dict[type[LedgerError], tuple[str, str]] = {
 
 
 def describe_error(exc: LedgerError) -> tuple[str, str]:
-    """Maps a LedgerError to a (원인, 힌트) pair for CLI display.
+    """LedgerError를 CLI 출력을 위한 (원인, 힌트) 쌍으로 매핑한다.
 
-    Checked in insertion order, so a subclass listed above its base
-    class wins — none of the current entries overlap, but the order is
-    kept intentional in case that changes. Falls back to the
-    exception's own message when there is no fixed Korean copy for its
-    type (e.g. a plain ValidationError from
-    LedgerService.list_transactions()'s limit check) — that message is
-    already descriptive, just not pre-translated.
+    등록된 순서대로 검사하므로, 기반 클래스보다 위에 적힌 하위
+    클래스가 우선 적용된다 — 현재 항목들은 서로 겹치지 않지만,
+    나중에 겹치게 될 경우를 대비해 이 순서는 의도적으로 유지한다.
+    해당 타입에 대해 고정된 한국어 문구가 없는 경우(예:
+    LedgerService.list_transactions()의 limit 검사에서 나오는 평범한
+    ValidationError)에는 예외 자체의 메시지로 대체한다 — 그 메시지는
+    이미 충분히 설명적이지만, 미리 번역해 두지 않았을 뿐이다.
     """
     for exc_type, pair in _ERROR_MESSAGES.items():
         if isinstance(exc, exc_type):
@@ -81,17 +82,17 @@ def describe_error(exc: LedgerError) -> tuple[str, str]:
 
 
 def handle_errors(func: Callable[..., None]) -> Callable[..., int]:
-    """Wraps the CLI dispatch boundary (ledger/cli.py::_dispatch): runs
-    `func` and, if it raises a LedgerError, prints
-    "[오류] ...\\n[힌트] ..." to stderr and returns exit code 1 instead
-    of propagating. Returns 0 if `func` completes normally.
+    """CLI 디스패치 경계(ledger/cli.py::_dispatch)를 감싼다: `func`를
+    실행하고, LedgerError가 발생하면 전파하는 대신 stderr에
+    "[오류] ...\\n[힌트] ..."를 출력하고 종료 코드 1을 반환한다.
+    `func`가 정상적으로 끝나면 0을 반환한다.
 
-    Deliberately narrow: only LedgerError (and its subclasses) is
-    caught. Anything else — a real programming bug (KeyError,
-    AttributeError, etc.) — is NOT caught here and propagates with its
-    traceback, so bugs stay visible during development instead of
-    being silently reported as ordinary user mistakes
-    (docs/m03-architecture-design.md section 41)."""
+    의도적으로 범위를 좁게 잡았다: LedgerError(와 그 하위 클래스)만
+    잡는다. 그 외의 것 — 진짜 프로그래밍 버그(KeyError, AttributeError
+    등) — 는 여기서 잡히지 않고 트레이스백과 함께 그대로 전파된다.
+    그래야 버그가 평범한 사용자 실수로 조용히 처리되지 않고 개발
+    중에도 눈에 보이게 된다(docs/m03-architecture-design.md 41번
+    섹션)."""
 
     @wraps(func)
     def wrapper(*args, **kwargs) -> int:

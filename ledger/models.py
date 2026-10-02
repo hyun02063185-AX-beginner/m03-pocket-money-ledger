@@ -1,13 +1,14 @@
-"""Shared data structures for the ledger.
+"""ledger에서 공유되는 데이터 구조.
 
-Sprint 1 made Transaction and Budget real (id/round-trip logic via
-to_dict()/from_dict()). Sprint 2 adds MonthlySummary — LedgerService's
-computed result type, shared between services.py and the future
-cli.py the same way Transaction/Budget are shared between repository.py
-and services.py. See docs/m03-architecture-design.md section 4 for
-field rationale (id is a plain int, not the display string
-"TX-000012"; Budget is a single month-wide total, not per-category)
-and section 36 for MonthlySummary's fields and semantics.
+Sprint 1에서 Transaction과 Budget을 실제로 구현했다(to_dict()/
+from_dict()를 통한 id/왕복 변환 로직). Sprint 2에서는
+MonthlySummary를 추가한다 — LedgerService가 계산한 결과 타입으로,
+Transaction/Budget이 repository.py와 services.py 사이에서 공유되는
+것과 같은 방식으로 services.py와 (이후 작성될) cli.py 사이에서
+공유된다. 필드 설계 근거(id는 표시 문자열 "TX-000012"가 아니라
+단순 int이며, Budget은 카테고리별이 아니라 월 전체 단위의 총액이라는
+점)는 docs/m03-architecture-design.md 4번 섹션을, MonthlySummary의
+필드와 의미는 36번 섹션을 참고하라.
 """
 
 from __future__ import annotations
@@ -20,20 +21,20 @@ from ledger.errors import LedgerError
 
 @dataclass
 class Transaction:
-    """A single income/expense record. One transactions.jsonl line.
+    """하나의 수입/지출 기록. transactions.jsonl의 한 줄에 대응한다.
 
-    `id` is the internal storage id (positive int, first is 1, next is
-    max(existing) + 1). Any "TX-000012"-style display formatting is a
-    cli.py presentation concern only — never stored or passed back in.
-    `date` is a real datetime.date in memory; to_dict()/from_dict() are
-    the only places that know it is persisted as an ISO "YYYY-MM-DD"
-    string.
+    `id`는 내부 저장용 id다(양의 정수이며 처음은 1, 다음은
+    max(기존 값) + 1). "TX-000012" 형태의 표시용 포맷팅은 전적으로
+    cli.py의 표현 관심사일 뿐이며, 저장되거나 다시 전달되는 값이 아니다.
+    `date`는 메모리상에서는 실제 datetime.date이며, 이를 ISO
+    "YYYY-MM-DD" 문자열로 저장한다는 사실을 아는 곳은 to_dict()/
+    from_dict()뿐이다.
     """
 
     id: int
-    type: str  # "income" | "expense"
+    type: str  # "income" 또는 "expense"
     date: datetime.date
-    amount: int  # positive integer
+    amount: int  # 양의 정수
     category: str
     memo: str = ""
     tags: list[str] = field(default_factory=list)
@@ -64,10 +65,10 @@ class Transaction:
 
 @dataclass
 class Budget:
-    """The single total budget for one calendar month (not per-category)."""
+    """한 달 전체에 대한 단일 총 예산(카테고리별이 아님)."""
 
-    month: str  # "YYYY-MM", unique key
-    amount: int  # positive integer
+    month: str  # "YYYY-MM" 형식, 고유 키
+    amount: int  # 양의 정수
 
     def to_dict(self) -> dict:
         return {"month": self.month, "amount": self.amount}
@@ -79,15 +80,16 @@ class Budget:
 
 @dataclass
 class SearchCriteria:
-    """Filters for LedgerService.search() — exactly the 6 official
-    search options (--from, --to, --category, --type, --q, --tag). No
-    min/max amount: not part of Mission Core. All filters are ANDed
-    together; any left as None is not applied.
+    """LedgerService.search()에 사용되는 필터 — 공식 검색 옵션 6개
+    (--from, --to, --category, --type, --q, --tag)와 정확히 대응한다.
+    최소/최대 금액은 없음: Mission Core 범위에 포함되지 않는다. 모든
+    필터는 AND로 결합되며, None으로 남겨둔 필터는 적용되지 않는다.
 
-    Match semantics (docs/m03-architecture-design.md section 37):
-    from_date/to_date are inclusive bounds on Transaction.date;
-    category/transaction_type/tag are exact, case-sensitive matches;
-    query is a case-insensitive substring match against memo only.
+    매칭 규칙(docs/m03-architecture-design.md 37번 섹션):
+    from_date/to_date는 Transaction.date에 대한 경계값을 포함한다
+    (inclusive); category/transaction_type/tag는 대소문자를 구분하는
+    완전 일치이며; query는 memo에 대해서만 대소문자를 구분하지 않는
+    부분 문자열 매칭이다.
     """
 
     from_date: datetime.date | None = None
@@ -100,17 +102,19 @@ class SearchCriteria:
 
 @dataclass
 class MonthlySummary:
-    """LedgerService.monthly_summary()'s result. A plain computed
-    value, never persisted — no to_dict()/from_dict() needed.
+    """LedgerService.monthly_summary()의 결과. 단순히 계산된 값이며
+    저장되지 않으므로 to_dict()/from_dict()가 필요 없다.
 
-    `has_transactions` lets cli.py (a later sprint) print a clear
-    "데이터 없음" message without inspecting other fields; the numeric
-    fields are still well-defined zeros/empties when it's False rather
-    than None, so callers never need a special case just to sum them.
+    `has_transactions`는 (이후 작성될) cli.py가 다른 필드를 살피지
+    않고도 명확하게 "데이터 없음" 메시지를 출력할 수 있게 해준다;
+    이 값이 False여도 숫자 필드들은 None이 아니라 잘 정의된 0/빈 값으로
+    남아 있으므로, 호출자가 합산을 위해 별도의 분기 처리를 할 필요가
+    없다.
 
-    budget_amount/budget_usage_percent/budget_exceeded are all None
-    together when no Budget is set for `month` — budgets are opt-in
-    per month, not a "0 = no budget" convention.
+    `month`에 대해 설정된 Budget이 없으면 budget_amount/
+    budget_usage_percent/budget_exceeded는 모두 None이다 — 예산은
+    "0이면 예산 없음"이라는 관례가 아니라, 월 단위로 선택적으로
+    설정하는 값이기 때문이다.
     """
 
     month: str
@@ -127,12 +131,13 @@ class MonthlySummary:
 
 @dataclass
 class ImportResult:
-    """LedgerService.import_csv()'s result (docs/m03-architecture-design.md
-    section 48). `errors` holds the raw LedgerError for each skipped
-    row (1-indexed by data row, header excluded) rather than a
-    pre-formatted string, so cli.py can reuse the exact same
-    describe_error() mapping it uses for every other error instead of
-    Service building "[건너뜀] ..." text itself."""
+    """LedgerService.import_csv()의 결과
+    (docs/m03-architecture-design.md 48번 섹션). `errors`는 건너뛴
+    각 행에 대해 미리 포맷된 문자열이 아니라 원본 LedgerError를
+    그대로 담는다(헤더를 제외한 데이터 행 기준 1부터 시작하는 번호).
+    이렇게 하면 Service가 직접 "[건너뜀] ..." 텍스트를 만들지 않고도
+    cli.py가 다른 모든 오류에 사용하는 것과 동일한 describe_error()
+    매핑을 재사용할 수 있다."""
 
     imported: int
     skipped: int

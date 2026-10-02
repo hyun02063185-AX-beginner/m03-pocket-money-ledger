@@ -1,4 +1,4 @@
-"""Entry point. Sprint 1 implementation target."""
+"""진입점. Sprint 1 구현 대상."""
 
 import sys
 
